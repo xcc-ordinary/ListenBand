@@ -46,7 +46,7 @@ export default defineConfig(
         "warn",
         {
           // 保留插件名和第三方项目的正式大小写。
-          ignoreRegex: ["B站|Chrome|Lingua Study|Whisper|ECDICT"],
+          ignoreRegex: ["B站|Chrome|ListenBand|Whisper|ECDICT"],
           enforceCamelCaseLower: true
         }
       ]

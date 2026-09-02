@@ -61,7 +61,7 @@ class ConfirmActionModal extends Modal {
   onOpen(): void {
     this.titleEl.setText(this.title);
     this.contentEl.createEl("p", { text: this.message });
-    const actions = this.contentEl.createDiv({ cls: "lingua-study-import-actions" });
+    const actions = this.contentEl.createDiv({ cls: "listenband-import-actions" });
     actions.createEl("button", { cls: "mod-cta", text: this.confirmLabel })
       .addEventListener("click", () => this.finish(true));
     actions.createEl("button", { text: "取消" })
@@ -150,7 +150,7 @@ export class DocumentTranscriptImportModal extends Modal {
 
   constructor(app: App, private readonly options: ImportWizardOptions) {
     super(app);
-    this.modalEl.addClass("lingua-study-document-import-modal");
+    this.modalEl.addClass("listenband-document-import-modal");
     const draft = options.initialDraft;
     if (draft) {
       this.restoredDraft = true;
@@ -186,14 +186,14 @@ export class DocumentTranscriptImportModal extends Modal {
       text: "可直接选择带时间轴的 srt/vtt，或导入博主提供的中英文文稿后自动对齐视频。"
     });
 
-    const source = this.contentEl.createDiv({ cls: "lingua-study-document-source" });
+    const source = this.contentEl.createDiv({ cls: "listenband-document-source" });
     const fileInput = source.createEl("input", { type: "file" });
     fileInput.accept = ".srt,.vtt,.pdf,.docx,.txt,.md,text/vtt,application/pdf";
-    fileInput.addClass("lingua-study-file-input");
+    fileInput.addClass("listenband-file-input");
     const choose = source.createEl("button", { text: "选择字幕或文稿" });
     choose.addEventListener("click", () => fileInput.click());
     const discard = source.createEl("button", { text: "放弃本次导入" });
-    discard.addClass("lingua-study-discard-draft");
+    discard.addClass("listenband-discard-draft");
     discard.addEventListener("click", () => void this.discardDraft());
     fileInput.addEventListener("change", () => {
       const file = fileInput.files?.[0];
@@ -204,7 +204,7 @@ export class DocumentTranscriptImportModal extends Modal {
     });
 
     this.textareaEl = this.contentEl.createEl("textarea", {
-      cls: "lingua-study-document-paste",
+      cls: "listenband-document-paste",
       placeholder: "也可以把博主提供的英文或中英对照文本粘贴到这里…"
     });
     this.textareaEl.rows = 7;
@@ -216,17 +216,17 @@ export class DocumentTranscriptImportModal extends Modal {
     const parse = this.contentEl.createEl("button", { cls: "mod-cta", text: "解析粘贴文本" });
     parse.addEventListener("click", () => this.parseText(this.textareaEl?.value ?? ""));
 
-    this.statusEl = this.contentEl.createDiv({ cls: "lingua-study-import-status" });
+    this.statusEl = this.contentEl.createDiv({ cls: "listenband-import-status" });
     this.statusEl.setAttribute("role", "status");
     if (this.restoredDraft) {
       this.contentEl.createDiv({
-        cls: "lingua-study-draft-restored",
+        cls: "listenband-draft-restored",
         text: "已恢复此前未完成的字幕导入进度。"
       });
       this.restoredDraft = false;
     }
-    this.previewEl = this.contentEl.createDiv({ cls: "lingua-study-document-preview" });
-    this.resultEl = this.contentEl.createDiv({ cls: "lingua-study-alignment-result" });
+    this.previewEl = this.contentEl.createDiv({ cls: "listenband-document-preview" });
+    this.resultEl = this.contentEl.createDiv({ cls: "listenband-alignment-result" });
     this.setStatus(this.statusMessage, this.statusError, false);
     if (this.rows.length > 0) {
       this.renderPreview();
@@ -353,27 +353,27 @@ export class DocumentTranscriptImportModal extends Modal {
       return;
     }
     const previousList = this.previewEl.querySelector<HTMLElement>(
-      ".lingua-study-document-row-list"
+      ".listenband-document-row-list"
     );
     const listScrollTop = previousList?.scrollTop ?? this.previewListScrollTop;
     const modalScrollTop = this.contentEl.scrollTop || this.modalScrollTop;
     this.previewEl.empty();
-    const heading = this.previewEl.createDiv({ cls: "lingua-study-document-preview-heading" });
+    const heading = this.previewEl.createDiv({ cls: "listenband-document-preview-heading" });
     heading.createEl("strong", { text: `文稿预览 · ${this.rows.length} 行` });
     heading.createEl("button", { text: "新增一行" }).addEventListener("click", () => {
       this.rows.push({ english: "", chinese: "" });
       this.invalidateResults();
       this.renderPreview();
     });
-    const list = this.previewEl.createDiv({ cls: "lingua-study-document-row-list" });
+    const list = this.previewEl.createDiv({ cls: "listenband-document-row-list" });
     this.rows.forEach((row, index) => {
-      const item = list.createDiv({ cls: "lingua-study-document-row" });
+      const item = list.createDiv({ cls: "listenband-document-row" });
       item.classList.toggle("has-unpaired-content", row.english.trim() === "" || row.chinese.trim() === "");
-      item.createSpan({ cls: "lingua-study-document-row-number", text: `${index + 1}` });
-      const english = item.createEl("textarea", { cls: "lingua-study-document-english" });
+      item.createSpan({ cls: "listenband-document-row-number", text: `${index + 1}` });
+      const english = item.createEl("textarea", { cls: "listenband-document-english" });
       english.value = row.english;
       english.setAttribute("aria-label", `第 ${index + 1} 行英文`);
-      const chinese = item.createEl("textarea", { cls: "lingua-study-document-chinese" });
+      const chinese = item.createEl("textarea", { cls: "listenband-document-chinese" });
       chinese.value = row.chinese;
       chinese.setAttribute("aria-label", `第 ${index + 1} 行中文`);
       const update = (): void => {
@@ -384,7 +384,7 @@ export class DocumentTranscriptImportModal extends Modal {
       };
       english.addEventListener("change", update);
       chinese.addEventListener("change", update);
-      const actions = item.createDiv({ cls: "lingua-study-document-row-actions" });
+      const actions = item.createDiv({ cls: "listenband-document-row-actions" });
       const iconButton = (icon: string, label: string, action: () => void): void => {
         const button = actions.createEl("button", { attr: { "aria-label": label } });
         setIcon(button, icon);
@@ -402,7 +402,7 @@ export class DocumentTranscriptImportModal extends Modal {
         this.renderPreview();
       });
     });
-    const controls = this.previewEl.createDiv({ cls: "lingua-study-alignment-controls" });
+    const controls = this.previewEl.createDiv({ cls: "listenband-alignment-controls" });
     controls.createEl("button", { cls: "mod-cta", text: "本地自动对齐" })
       .addEventListener("click", () => void this.runAlignment());
 
@@ -527,7 +527,7 @@ export class DocumentTranscriptImportModal extends Modal {
     this.stopPreview();
     this.resultEl.empty();
     this.resultEl.createDiv({
-      cls: "lingua-study-alignment-result-summary",
+      cls: "listenband-alignment-result-summary",
       text: `本地识别匹配度 · ${Math.round(this.result.averageConfidence * 100)}%`
     });
     const result = this.result;
@@ -541,7 +541,7 @@ export class DocumentTranscriptImportModal extends Modal {
     this.alignmentStatusEls = [];
     this.alignmentPreviewButtons = [];
     this.previewAudioEl = this.resultEl.createEl("audio", {
-      cls: "lingua-study-alignment-audio",
+      cls: "listenband-alignment-audio",
       attr: { preload: "metadata" }
     });
     this.previewAudioEl.setAttribute("aria-label", "对齐结果试听播放器");
@@ -550,8 +550,8 @@ export class DocumentTranscriptImportModal extends Modal {
     this.previewAudioEl.addEventListener("play", () => this.updatePreviewPlaybackButton());
     this.previewAudioEl.addEventListener("pause", () => this.updatePreviewPlaybackButton());
 
-    const player = this.resultEl.createDiv({ cls: "lingua-study-alignment-player" });
-    const transport = player.createDiv({ cls: "lingua-study-alignment-transport" });
+    const player = this.resultEl.createDiv({ cls: "listenband-alignment-player" });
+    const transport = player.createDiv({ cls: "listenband-alignment-transport" });
     this.previewPlayButton = transport.createEl("button", {
       attr: { "aria-label": "播放对齐音频" }
     });
@@ -569,7 +569,7 @@ export class DocumentTranscriptImportModal extends Modal {
       });
     });
     this.previewTimeEl = transport.createSpan({
-      cls: "lingua-study-alignment-clock",
+      cls: "listenband-alignment-clock",
       text: `${formatAlignmentTime(0)} / ${formatAlignmentTime(this.previewTotalDuration)}`
     });
     const forward = transport.createEl("button", { text: "+0.5 秒" });
@@ -581,7 +581,7 @@ export class DocumentTranscriptImportModal extends Modal {
     });
 
     this.previewSeekEl = player.createEl("input", {
-      cls: "lingua-study-alignment-seek",
+      cls: "listenband-alignment-seek",
       type: "range",
       attr: {
         min: "0",
@@ -610,36 +610,36 @@ export class DocumentTranscriptImportModal extends Modal {
       });
     });
 
-    const calibration = player.createDiv({ cls: "lingua-study-alignment-calibration" });
+    const calibration = player.createDiv({ cls: "listenband-alignment-calibration" });
     this.activeCalibrationEl = calibration.createDiv({
-      cls: "lingua-study-alignment-active-label",
+      cls: "listenband-alignment-active-label",
       text: "请先在下方选择“校准此句”"
     });
-    const markActions = calibration.createDiv({ cls: "lingua-study-alignment-mark-actions" });
+    const markActions = calibration.createDiv({ cls: "listenband-alignment-mark-actions" });
     this.recordStartButton = markActions.createEl("button", { text: "设当前时间为开始" });
     this.recordStartButton.addEventListener("click", () => this.recordCalibrationStart());
     this.recordEndButton = markActions.createEl("button", { text: "设当前时间为结束" });
     this.recordEndButton.addEventListener("click", () => this.recordCalibrationEnd());
     this.calibrationFeedbackEl = calibration.createDiv({
-      cls: "lingua-study-calibration-feedback"
+      cls: "listenband-calibration-feedback"
     });
     this.calibrationFeedbackEl.setAttribute("role", "status");
 
-    const list = this.resultEl.createDiv({ cls: "lingua-study-alignment-row-list" });
+    const list = this.resultEl.createDiv({ cls: "listenband-alignment-row-list" });
     this.resultListEl = list;
     result.rows.forEach((row, index) => {
-      const item = list.createDiv({ cls: "lingua-study-alignment-row" });
+      const item = list.createDiv({ cls: "listenband-alignment-row" });
       item.classList.toggle("is-low-confidence", row.confidence < 0.6);
       this.alignmentRowEls.push(item);
-      const content = item.createDiv({ cls: "lingua-study-alignment-content" });
-      content.createDiv({ cls: "lingua-study-alignment-text", text: row.english });
-      const readout = content.createDiv({ cls: "lingua-study-alignment-readout" });
+      const content = item.createDiv({ cls: "listenband-alignment-content" });
+      content.createDiv({ cls: "listenband-alignment-text", text: row.english });
+      const readout = content.createDiv({ cls: "listenband-alignment-readout" });
       const inputState = this.ensureTimeInput(index, row);
       const startLabel = readout.createEl("label");
       startLabel.createSpan({ text: "开始" });
       const start = startLabel.createEl("input", {
         type: "text",
-        cls: "lingua-study-alignment-time-input",
+        cls: "listenband-alignment-time-input",
         attr: {
           value: inputState.start,
           inputmode: "decimal",
@@ -652,7 +652,7 @@ export class DocumentTranscriptImportModal extends Modal {
       endLabel.createSpan({ text: "结束" });
       const end = endLabel.createEl("input", {
         type: "text",
-        cls: "lingua-study-alignment-time-input",
+        cls: "listenband-alignment-time-input",
         attr: {
           value: inputState.end,
           inputmode: "decimal",
@@ -664,8 +664,8 @@ export class DocumentTranscriptImportModal extends Modal {
       this.bindTimeInput(start, index, "start");
       this.bindTimeInput(end, index, "end");
       this.alignmentTimeInputs.push({ start, end });
-      const timing = item.createDiv({ cls: "lingua-study-alignment-timing" });
-      const status = timing.createSpan({ cls: "lingua-study-alignment-row-status" });
+      const timing = item.createDiv({ cls: "listenband-alignment-timing" });
+      const status = timing.createSpan({ cls: "listenband-alignment-row-status" });
       this.alignmentStatusEls.push(status);
       const calibrate = timing.createEl("button", { text: "校准此句" });
       calibrate.addEventListener("click", () => this.selectCalibrationRow(index));
@@ -680,12 +680,12 @@ export class DocumentTranscriptImportModal extends Modal {
         });
       });
     });
-    const footer = this.resultEl.createDiv({ cls: "lingua-study-alignment-footer" });
-    this.issueSummaryEl = footer.createDiv({ cls: "lingua-study-alignment-issues" });
+    const footer = this.resultEl.createDiv({ cls: "listenband-alignment-footer" });
+    this.issueSummaryEl = footer.createDiv({ cls: "listenband-alignment-issues" });
     this.jumpIssueButton = footer.createEl("button", { text: "跳到下一条无效句" });
     this.jumpIssueButton.addEventListener("click", () => void this.jumpToNextIssue());
     this.applyAlignmentButton = footer.createEl("button", {
-      cls: "mod-cta lingua-study-apply-alignment",
+      cls: "mod-cta listenband-apply-alignment",
       text: "应用本地对齐结果"
     });
     this.applyAlignmentButton.addEventListener("click", () => void this.applyAlignment(result));
@@ -1315,7 +1315,7 @@ export class DocumentTranscriptImportModal extends Modal {
     }
     this.modalScrollTop = this.contentEl.scrollTop;
     this.previewListScrollTop = this.previewEl?.querySelector<HTMLElement>(
-      ".lingua-study-document-row-list"
+      ".listenband-document-row-list"
     )?.scrollTop ?? this.previewListScrollTop;
     this.resultListScrollTop = this.resultListEl?.scrollTop ?? this.resultListScrollTop;
   }

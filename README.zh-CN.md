@@ -5,13 +5,13 @@
 ListenBand 是一个桌面版 Obsidian 插件：把视频和双语文稿变成可操作的听力学习材料，支持带时间戳字幕、本地缓存播放、逐句跟读、离线词典和按需 AI 翻译。字幕、翻译缓存、词典数据以及可选的 Whisper 对齐尽可能保留在本地设备。
 
 > [!IMPORTANT]
-> ListenBand 1.2.2 仅支持桌面版 Obsidian，当前主要面向“英文视频字幕 → 简体中文学习”的场景。公开 YouTube 字幕导入使用非官方公开接口，因为 [YouTube 官方字幕下载 API](https://developers.google.com/youtube/v3/docs/captions/download) 只能下载用户有权编辑的视频字幕。YouTube 与哔哩哔哩的公开接口可能随时变化。本插件不会绕过登录、地区、嵌入、会员或反机器人限制。
+> ListenBand V1.0 仅支持桌面版 Obsidian，当前主要面向“英文视频字幕 → 简体中文学习”的场景。公开 YouTube 字幕导入使用非官方公开接口，因为 [YouTube 官方字幕下载 API](https://developers.google.com/youtube/v3/docs/captions/download) 只能下载用户有权编辑的视频字幕。YouTube 与哔哩哔哩的公开接口可能随时变化。本插件不会绕过登录、地区、嵌入、会员或反机器人限制。
 
 ## 功能概览
 
 - 使用隐私增强域名 `youtube-nocookie.com` 嵌入 YouTube 播放器
 - 本地缓存并播放哔哩哔哩视频；缓存不可用时回退到哔哩哔哩官方外部播放器
-- 在 Obsidian 左侧功能区提供 Lingua Study 专属图标，用于手动导入当前笔记中的 YouTube 或哔哩哔哩链接
+- 在 Obsidian 左侧功能区提供 ListenBand 专属图标，用于手动导入当前笔记中的 YouTube 或哔哩哔哩链接
 - 可选“粘贴单个独立视频链接后自动导入”，默认关闭
 - 直接导入哔哩哔哩英文字幕；仅在平台要求时使用与浏览器隔离的 Obsidian 内登录窗口
 - 优先使用人工英文字幕，找不到时再尝试自动英文字幕
@@ -46,11 +46,11 @@ ListenBand 是一个桌面版 Obsidian 插件：把视频和双语文稿变成�
 
 ### 从 Obsidian 社区插件市场安装
 
-Lingua Study 的项目页面可能会先出现在 Obsidian 社区网站，而插件稍后才进入 Obsidian 客户端的正式目录。审核版本能够在客户端搜索到以后，打开：
+ListenBand 的项目页面可能会先出现在 Obsidian 社区网站，而插件稍后才进入 Obsidian 客户端的正式目录。审核版本能够在客户端搜索到以后，打开：
 
 **设置 → 第三方插件 → 浏览**
 
-搜索 `Lingua Study`，然后安装或更新。在客户端尚未收录前，请使用下面的手动安装方法。
+搜索 `ListenBand`，然后安装或更新。在客户端尚未收录前，请使用下面的手动安装方法。
 
 ### 手动安装
 
@@ -59,27 +59,27 @@ Lingua Study 的项目页面可能会先出现在 Obsidian 社区网站，而插
 3. 在仓库中创建以下插件目录：
 
    ```text
-   <仓库目录>/.obsidian/plugins/lingua-study/
+   <仓库目录>/.obsidian/plugins/listenband/
    ```
 
 4. 将下载的三个文件放入该目录。
 5. 重新加载 Obsidian。
-6. 在 **设置 → 第三方插件** 中启用 **Lingua Study**。
+6. 在 **设置 → 第三方插件** 中启用 **ListenBand**。
 
-哔哩哔哩字幕导入不需要 Chrome 扩展。如果视频要求登录，Lingua Study 会在 Obsidian 内打开一个独立的哔哩哔哩登录窗口，并在登录成功后自动重试。
+哔哩哔哩字幕导入不需要 Chrome 扩展。如果视频要求登录，ListenBand 会在 Obsidian 内打开一个独立的哔哩哔哩登录窗口，并在登录成功后自动重试。
 
 ## 使用方法
 
 ### 导入 YouTube 视频
 
 1. 在 Markdown 笔记中粘贴一个 YouTube 视频链接。
-2. 点击 Obsidian 左侧功能区的 Lingua Study 图标。
+2. 点击 Obsidian 左侧功能区的 ListenBand 图标。
 3. 等待字幕保存完成，插件会将笔记切换到阅读视图。
 
-导入成功后，Lingua Study 会：
+导入成功后，ListenBand 会：
 
 - 删除笔记中较长的原始视频链接
-- 将英文字幕保存到 `Lingua Study/Transcripts`
+- 将英文字幕保存到 `ListenBand/Transcripts`
 - 在笔记中插入学习代码块
 - 切换到阅读视图并显示播放器、字幕和学习操作
 
@@ -87,7 +87,7 @@ Lingua Study 的项目页面可能会先出现在 Obsidian 社区网站，而插
 
 如果希望恢复“粘贴链接后自动导入”，请打开：
 
-**设置 → 第三方插件 → Lingua Study → 通用选项 → 粘贴视频链接后自动创建学习内容**
+**设置 → 第三方插件 → ListenBand → 通用选项 → 粘贴视频链接后自动创建学习内容**
 
 该功能默认关闭，避免粘贴资料时意外触发导入。
 
@@ -100,17 +100,17 @@ YouTube 字幕会按照以下顺序自动尝试：
 
 字幕保存目录和 `yt-dlp` 的完整路径可以在以下位置修改：
 
-**设置 → 第三方插件 → Lingua Study → YouTube 字幕导入**
+**设置 → 第三方插件 → ListenBand → YouTube 字幕导入**
 
 不填写 `yt-dlp` 路径时，插件会搜索系统 PATH，以及常见的 Homebrew、MacPorts 和 Windows 命令位置。已有且有效的字幕文件会直接复用，不再发起网络请求；同一视频已经存在学习块时，也不会重复插入。
 
 ### 导入哔哩哔哩视频
 
 1. 在 Markdown 笔记中粘贴一个公开哔哩哔哩视频链接。
-2. 点击 Obsidian 左侧功能区的 Lingua Study 图标。
+2. 点击 Obsidian 左侧功能区的 ListenBand 图标。
 3. 等待字幕保存完成，插件会将笔记切换到阅读视图。
 
-Lingua Study 会直接读取哔哩哔哩的独立字幕轨道，并把公开的合并版 MP4 下载到操作系统缓存目录。如果平台提示字幕需要登录，用户可以在 Obsidian 内的隔离窗口中登录，插件随后自动重试。该登录会话与 Chrome 分开。
+ListenBand 会直接读取哔哩哔哩的独立字幕轨道，并把公开的合并版 MP4 下载到操作系统缓存目录。如果平台提示字幕需要登录，用户可以在 Obsidian 内的隔离窗口中登录，插件随后自动重试。该登录会话与 Chrome 分开。
 
 导入成功后，插件会保存字幕、删除笔记中的长视频链接、插入一个学习块并切换到阅读视图。支持 BV 号、av 号、多分 P 视频的 `?p=` 链接和官方 `b23.tv` 分享链接。
 
@@ -126,13 +126,13 @@ Lingua Study 会直接读取哔哩哔哩的独立字幕轨道，并把公开的�
 
 可通过以下位置打开视频缓存目录：
 
-**设置 → 第三方插件 → Lingua Study → 哔哩哔哩视频与登录 → 打开缓存文件夹**
+**设置 → 第三方插件 → ListenBand → 哔哩哔哩视频与登录 → 打开缓存文件夹**
 
 缓存视频位于 Obsidian 仓库之外，不受 Obsidian Sync 管理。生成的字幕 JSON 仍保存在仓库内配置的字幕目录中。哔哩哔哩登录 Cookie 只保存在 Electron 的隔离持久会话中，不会写入笔记、字幕、插件设置或 Obsidian Sync；可以在同一设置区域中清除。
 
 ### 手动创建字幕文件
 
-Lingua Study 1.0.x 创建的笔记和版本 1 JSON 字幕仍然兼容。高级用户也可以手动创建字幕 JSON：
+ListenBand 1.0.x 创建的笔记和版本 1 JSON 字幕仍然兼容。高级用户也可以手动创建字幕 JSON：
 
 ```json
 {
@@ -153,7 +153,7 @@ Lingua Study 1.0.x 创建的笔记和版本 1 JSON 字幕仍然兼容。高级�
 然后在 Markdown 笔记中添加：
 
 ````markdown
-```lingua-study
+```listenband
 transcript: Language study/Transcripts/example.json
 ```
 ````
@@ -162,7 +162,7 @@ transcript: Language study/Transcripts/example.json
 
 ## 配置翻译服务
 
-打开 **设置 → 第三方插件 → Lingua Study**，然后选择一个翻译服务。
+打开 **设置 → 第三方插件 → ListenBand**，然后选择一个翻译服务。
 
 ### DeepSeek
 
@@ -184,7 +184,7 @@ transcript: Language study/Transcripts/example.json
 - 服务商实际支持的准确模型 ID
 - 通过 Obsidian SecretStorage 选择的 Bearer API Key
 
-Lingua Study 1.2.1 暂不支持自定义请求头、Anthropic 兼容接口、Ollama 和其他翻译目标语言。可以选择启用整篇翻译；插件会按顺序逐句请求，并自动跳过已有结果的句子。
+ListenBand 1.2.1 暂不支持自定义请求头、Anthropic 兼容接口、Ollama 和其他翻译目标语言。可以选择启用整篇翻译；插件会按顺序逐句请求，并自动跳过已有结果的句子。
 
 ## 翻译与学习操作
 
@@ -199,9 +199,9 @@ Lingua Study 1.2.1 暂不支持自定义请求头、Anthropic 兼容接口、Oll
 
 用户第一次手动编辑字幕时，原始版本会写入同一个版本 1 字幕 JSON 的可选 `originalText` 字段，已有文件仍保持兼容。
 
-双击一个英文单词会执行完全离线的词典查询，不会调用 AI 服务。压缩后的 ECDICT 考试与词频子集已经内置于 `main.js`。用户还可以在 **设置 → Lingua Study → 学习与词典** 中安装完整 ECDICT。插件优先下载约 24.4 MB 的预生成 ZIP，不可用时自动回退到 ECDICT 官方 CSV；下载支持断点续传和最多三次尝试。词典保存在操作系统缓存目录，不写入 Obsidian 笔记库，也不参与 Obsidian Sync。发音按钮使用操作系统已经安装的英文语音。
+双击一个英文单词会执行完全离线的词典查询，不会调用 AI 服务。压缩后的 ECDICT 考试与词频子集已经内置于 `main.js`。用户还可以在 **设置 → ListenBand → 学习与词典** 中安装完整 ECDICT。插件优先下载约 24.4 MB 的预生成 ZIP，不可用时自动回退到 ECDICT 官方 CSV；下载支持断点续传和最多三次尝试。词典保存在操作系统缓存目录，不写入 Obsidian 笔记库，也不参与 Obsidian Sync。发音按钮使用操作系统已经安装的英文语音。
 
-启用翻译缓存后，Lingua Study 会在字幕文件旁创建独立缓存文件：
+启用翻译缓存后，ListenBand 会在字幕文件旁创建独立缓存文件：
 
 ```text
 example.json
@@ -211,7 +211,7 @@ example.zh-CN.study.json
 
 ## 隐私、联网与费用
 
-- Lingua Study 学习块渲染后，YouTube 播放器会连接 YouTube
+- ListenBand 学习块渲染后，YouTube 播放器会连接 YouTube
 - 哔哩哔哩视频缓存会连接官方 `b23.tv`、`api.bilibili.com`，以及白名单中的 HTTPS `bilivideo.com` 或 `bilivideo.cn` CDN 域名
 - 哔哩哔哩字幕默认使用匿名 HTTPS 请求；如果平台要求登录，隔离的 Electron 会话只会把 Cookie 发送给哔哩哔哩自有 API 域名，Cookie 值不会写入仓库或插件设置
 - 哔哩哔哩 MP4 和小型 JSON 清单保存在操作系统用户缓存目录，位于 Obsidian 仓库之外；单个缓存视频最大 2 GB，当前匿名合并格式通常最高为 480P
@@ -220,13 +220,13 @@ example.zh-CN.study.json
 - YouTube 直接导入只连接 `youtube.com` 下的 HTTPS 地址，可能使用公开观看页面、内部播放器和 timed-text 字幕接口；插件不包含固定 YouTube API Key
 - YouTube 直接导入不使用浏览器 Cookie、Google 登录、用户 API Key、作者服务器或遥测
 - 直接导入失败且电脑上存在有效 `yt-dlp` 时，插件不会通过 Shell 执行它，会忽略用户级 `yt-dlp` 配置，只把字幕下载到临时目录，解析完成后删除；不会请求视频或音频
-- 本地 SRT/VTT 只在设备上读取，Lingua Study 不会上传这些文件
+- 本地 SRT/VTT 只在设备上读取，ListenBand 不会上传这些文件
 - PDF、DOCX、TXT、Markdown 和粘贴文稿都在本地解析；只有图片而没有可选文字的 PDF 需要先进行 OCR
 - 本地字幕对齐只会在用户确认后下载固定版本的 Whisper Base English 模型和运行环境；视频和文稿不会离开设备
 - AI 翻译请求只连接用户配置的 DeepSeek、Kimi 或 OpenAI 兼容 HTTPS 服务
 - 学习卡请求只发送用户明确选择的字幕句、当前学习目标和本地匹配的词典标签
 - 离线词典查询和系统发音不会发起网络请求
-- 连接测试只发送固定句子 `Thank you for using Lingua Study.`
+- 连接测试只发送固定句子 `Thank you for using ListenBand.`
 - 插件不收集遥测数据、不展示广告、不创建账号，也不运行作者控制的服务器
 - 插件不会把翻译 API Key 明文写入插件数据、笔记、字幕文件、翻译缓存或控制台日志
 - 第三方翻译服务可能产生 API 费用，请在使用前核对对应服务的最新条款和价格
@@ -240,11 +240,11 @@ example.zh-CN.study.json
 - 哔哩哔哩可能因为发布者设置、账号、地区、版权、会员、请求频率或平台变化而拒绝或限制下载与外部播放
 - 部分哔哩哔哩视频的可见字幕只是烧录在画面中的像素，不是独立字幕轨道；这类视频需要导入 SRT/VTT，或者导入作者文稿并执行本地对齐
 - 哔哩哔哩字幕导入依赖当前网页接口；即使已经登录，会员、频率限制、地区或平台变化仍可能阻止获取
-- Lingua Study 不提供 YouTube 登录流程，也不会使用 Cookie 绕过限制
+- ListenBand 不提供 YouTube 登录流程，也不会使用 Cookie 绕过限制
 - 公开视频字幕导入依赖非官方 YouTube 接口；YouTube 改动后可能需要更新插件
 - `yt-dlp` 不会随插件打包、安装或自动更新；只有电脑上已经存在兼容的可执行文件时才能作为后备方案
 - 无法获取英文字幕的 YouTube 视频仍需要用户提供本地英文 SRT/VTT；插件不会悄悄把其他语言机器翻译成英文
-- Lingua Study 不提供云端语音转写服务；本地 Whisper 对齐会在所需模型文件下载完成后在用户设备上运行
+- ListenBand 不提供云端语音转写服务；本地 Whisper 对齐会在所需模型文件下载完成后在用户设备上运行
 - 当前界面和翻译目标语言是简体中文
 - IELTS 学习提示属于按目标生成的辅助内容，并不代表存在官方固定 IELTS 词表
 
@@ -264,4 +264,4 @@ npm run check:release
 
 ## 开源协议
 
-[MIT](./LICENSE) © 2026 xiaobai。插件内置和可选的第三方组件见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。
+[MIT](./LICENSE) © 2026 Sisyphe。插件内置和可选的第三方组件见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。

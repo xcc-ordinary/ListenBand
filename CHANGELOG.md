@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Lingua Study are documented in this file.
+All notable changes to ListenBand are documented in this file.
 
 ## Unreleased
 
@@ -24,7 +24,7 @@ All notable changes to Lingua Study are documented in this file.
 - Added a disabled-by-default setting to turn paste-to-import on or off
 - Added compact **打开原视频** actions to YouTube, cached Bilibili, and online Bilibili players
 - Added smooth transcript-only scrolling that keeps the playing segment centered
-- Added the command **Lingua Study: 从哔哩哔哩链接创建学习内容**
+- Added the command **ListenBand: 从哔哩哔哩链接创建学习内容**
 - Added strict Bilibili BV, av, multi-part, and official b23.tv share-link recognition
 - Added in-note fallback playback through Bilibili's official external player when no valid cache exists
 - Added duplicate-player protection while preserving the original pasted link
@@ -53,14 +53,14 @@ All notable changes to Lingua Study are documented in this file.
 - Removed the retired Distil Large V3 prototype and its obsolete settings while retaining optional local Whisper Base English alignment
 - Removed the retired cloud speech-alignment prototype and its obsolete credentials
 - Replaced the retired Chrome-helper prototype with direct subtitle requests and an isolated in-Obsidian Bilibili login session
-- Added one-time cleanup limited to Lingua Study's former Distil Large V3, Base, Small, and Whisper runtime caches
+- Added one-time cleanup limited to ListenBand's former Distil Large V3, Base, Small, and Whisper runtime caches
 - Keeps SRT/VTT, player-only, transcript editing, translation, video cache, and version 1 note compatibility
 
 ### Fixed
 
 - Made the automated test runner use the operating system's temporary directory on macOS, Linux, and Windows
 - Prevented CodeMirror from restoring `contain: paint` and clipping full-width transcript timestamps or text in Live Preview
-- Restored the video player and transcript on the first return to YouTube and Bilibili study notes instead of leaving the `lingua-study` block in source-editing state
+- Restored the video player and transcript on the first return to YouTube and Bilibili study notes instead of leaving the `listenband` block in source-editing state
 - Automatically repaired older standalone study notes whose closing code fence was the final character, without changing their block contents
 
 ## 1.1.0 - 2026-08-13
@@ -69,11 +69,11 @@ YouTube one-command import update.
 
 ### Added
 
-- Added the command **Lingua Study: 从 YouTube 链接创建学习内容** for Markdown notes
+- Added the command **ListenBand: 从 YouTube 链接创建学习内容** for Markdown notes
 - Added strict YouTube URL recognition for watch, youtu.be, Shorts, embed, live, and YouTube Music links
 - Added direct import of public manual or automatic English captions without cookies, login, user API keys, telemetry, or a developer server
 - Added local SRT/VTT fallback import with a 10 MB limit when public captions are unavailable
-- Added a configurable transcript folder with `Lingua Study/Transcripts` as the default
+- Added a configurable transcript folder with `ListenBand/Transcripts` as the default
 - Added an independent YTranscript-compatible iPhone player fallback with MIT attribution
 - Added optional automatic discovery and execution of a separately installed local `yt-dlp`
 - Added an optional `yt-dlp` executable path setting for desktop environments where automatic discovery fails

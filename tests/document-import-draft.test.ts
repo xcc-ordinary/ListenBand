@@ -68,7 +68,7 @@ test("草稿存储会保留其他视频并只删除目标草稿", async () => {
       }
     }
   };
-  const store = new DocumentImportDraftStore(app as never, "lingua-study");
+  const store = new DocumentImportDraftStore(app as never, "listenband");
   const first = "first";
   const second = "second";
   const firstDraft = validateDocumentImportDraft(createDraft());

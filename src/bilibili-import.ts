@@ -35,7 +35,7 @@ import type {
   BilibiliSubtitleSuccessResult
 } from "./bilibili-api-core";
 import { BilibiliSessionService } from "./bilibili-session";
-import type { LinguaStudySettings } from "./settings";
+import type { ListenBandSettings } from "./settings";
 import {
   validateTranscript,
   type TranscriptFile,
@@ -107,7 +107,7 @@ class BilibiliLinkModal extends Modal {
 
     for (const link of this.links) {
       const button = this.contentEl.createEl("button", {
-        cls: "mod-cta lingua-study-link-choice",
+        cls: "mod-cta listenband-link-choice",
         text: linkLabel(link)
       });
       button.addEventListener("click", () => this.finish(link));
@@ -117,9 +117,9 @@ class BilibiliLinkModal extends Modal {
       type: "url",
       placeholder: "https://www.bilibili.com/video/BV..."
     });
-    input.addClass("lingua-study-url-input");
-    const errorEl = this.contentEl.createDiv({ cls: "lingua-study-import-error" });
-    const actions = this.contentEl.createDiv({ cls: "lingua-study-import-actions" });
+    input.addClass("listenband-url-input");
+    const errorEl = this.contentEl.createDiv({ cls: "listenband-import-error" });
+    const actions = this.contentEl.createDiv({ cls: "listenband-import-actions" });
     const importButton = actions.createEl("button", { cls: "mod-cta", text: "创建学习内容" });
     actions.createEl("button", { text: "取消" }).addEventListener("click", () => this.finish(null));
 
@@ -179,11 +179,11 @@ class BilibiliSubtitleFallbackModal extends Modal {
     this.contentEl.createEl("p", {
       text: "也可以选择本机 .srt 或 .vtt 文件（最大 10 MB），或只创建播放器。"
     });
-    const errorEl = this.contentEl.createDiv({ cls: "lingua-study-import-error" });
+    const errorEl = this.contentEl.createDiv({ cls: "listenband-import-error" });
     const fileInput = this.contentEl.createEl("input", { type: "file" });
     fileInput.accept = ".srt,.vtt,text/vtt,application/x-subrip";
-    fileInput.addClass("lingua-study-file-input");
-    const actions = this.contentEl.createDiv({ cls: "lingua-study-import-actions" });
+    fileInput.addClass("listenband-file-input");
+    const actions = this.contentEl.createDiv({ cls: "listenband-import-actions" });
     if (this.options.allowLogin) {
       actions.createEl("button", {
         cls: "mod-cta",
@@ -265,7 +265,7 @@ export class BilibiliImportController {
     private readonly app: App,
     private readonly cacheService: BilibiliCacheService,
     private readonly bilibiliSession: BilibiliSessionService,
-    private readonly getSettings: () => LinguaStudySettings,
+    private readonly getSettings: () => ListenBandSettings,
     private readonly localWhisper: LocalWhisperService,
     private readonly saveImportedTranslations: (
       transcriptPath: string,
@@ -275,7 +275,7 @@ export class BilibiliImportController {
       sourceLabel: string
     ) => Promise<void>
   ) {
-    this.documentImportDraftStore = new DocumentImportDraftStore(app, "lingua-study");
+    this.documentImportDraftStore = new DocumentImportDraftStore(app, "listenband");
   }
 
   async openTranscriptImport(

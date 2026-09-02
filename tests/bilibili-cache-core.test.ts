@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { join } from "node:path";
 import {
   buildBilibiliCacheBaseName,
   getDefaultBilibiliCacheFolder,
@@ -11,15 +12,15 @@ import {
 test("为不同桌面系统选择不会进入 Obsidian 笔记库的缓存目录", () => {
   assert.equal(
     getDefaultBilibiliCacheFolder("darwin", "/Users/test", {}),
-    "/Users/test/Library/Caches/Lingua Study/Bilibili"
+    join("/Users/test", "Library", "Caches", "ListenBand", "Bilibili")
   );
   assert.equal(
     getDefaultBilibiliCacheFolder("linux", "/home/test", { XDG_CACHE_HOME: "/cache" }),
-    "/cache/lingua-study/bilibili"
+    join("/cache", "listenband", "bilibili")
   );
   assert.equal(
     getDefaultBilibiliCacheFolder("win32", "C:\\Users\\test", { LOCALAPPDATA: "C:\\Local" }),
-    "C:\\Local/Lingua Study/Cache/Bilibili"
+    join("C:\\Local", "ListenBand", "Cache", "Bilibili")
   );
 });
 

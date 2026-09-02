@@ -1,6 +1,6 @@
 import type { TranscriptSegment } from "./transcript-core";
 
-export const DEFAULT_TRANSCRIPT_FOLDER = "Lingua Study/Transcripts";
+export const DEFAULT_TRANSCRIPT_FOLDER = "ListenBand/Transcripts";
 
 export interface YouTubeLink {
   videoId: string;
@@ -892,7 +892,7 @@ export function parseSubtitleFile(text: string): TranscriptSegment[] {
 }
 
 export function buildStudyBlock(transcriptPath: string): string {
-  return `\`\`\`lingua-study\ntranscript: ${transcriptPath}\n\`\`\``;
+  return `\`\`\`listenband\ntranscript: ${transcriptPath}\n\`\`\``;
 }
 
 export function buildBilibiliStudyBlock(
@@ -903,7 +903,7 @@ export function buildBilibiliStudyBlock(
     ? `bvid: ${link.videoId}`
     : `aid: ${link.videoId.slice(2)}`;
   const transcriptLine = transcriptPath ? `\ntranscript: ${transcriptPath}` : "";
-  return `\`\`\`lingua-study\nplatform: bilibili\n${idLine}\npage: ${link.page}${transcriptLine}\n\`\`\``;
+  return `\`\`\`listenband\nplatform: bilibili\n${idLine}\npage: ${link.page}${transcriptLine}\n\`\`\``;
 }
 
 export function addTranscriptToBilibiliStudyBlock(
@@ -911,7 +911,7 @@ export function addTranscriptToBilibiliStudyBlock(
   link: BilibiliVideoLink,
   transcriptPath: string
 ): string | null {
-  const blockPattern = /```(?:lingua-study|english-video-study)\s*\n([\s\S]*?)```/gu;
+  const blockPattern = /```(?:listenband|lingua-study|english-video-study)\s*\n([\s\S]*?)```/gu;
   for (const block of markdown.matchAll(blockPattern)) {
     const body = block[1] ?? "";
     if (!/^\s*platform\s*:\s*bilibili\s*$/imu.test(body)) {
@@ -979,7 +979,7 @@ export function extractBilibiliVideosFromStudyBlocks(
   markdown: string
 ): Array<{ idType: "bvid" | "aid"; videoId: string; page: number }> {
   const videos: Array<{ idType: "bvid" | "aid"; videoId: string; page: number }> = [];
-  const blockPattern = /```(?:lingua-study|english-video-study)\s*\n([\s\S]*?)```/gu;
+  const blockPattern = /```(?:listenband|lingua-study|english-video-study)\s*\n([\s\S]*?)```/gu;
   for (const block of markdown.matchAll(blockPattern)) {
     const body = block[1] ?? "";
     if (!/^\s*platform\s*:\s*bilibili\s*$/imu.test(body)) {
@@ -1016,7 +1016,7 @@ export function chooseAvailableTranscriptPath(
 
 export function extractTranscriptPathsFromStudyBlocks(markdown: string): string[] {
   const paths: string[] = [];
-  const blockPattern = /```(?:lingua-study|english-video-study)\s*\n([\s\S]*?)```/gu;
+  const blockPattern = /```(?:listenband|lingua-study|english-video-study)\s*\n([\s\S]*?)```/gu;
   for (const block of markdown.matchAll(blockPattern)) {
     const body = block[1] ?? "";
     const pathMatch = /^\s*transcript\s*:\s*(?:"([^"]+)"|'([^']+)'|([^\n#]+))/mu.exec(body);

@@ -3,7 +3,7 @@ import { normalizeLookupWord } from "./dictionary-core";
 import { isStudyProfile, type StudyProfile } from "./study-core";
 
 export const VOCABULARY_BOOK_VERSION = 1 as const;
-export const VOCABULARY_BOOK_PATH = "Lingua Study/Vocabulary/wordbook.json";
+export const VOCABULARY_BOOK_PATH = "ListenBand/Vocabulary/wordbook.json";
 export const MAX_REVIEW_INTERVAL_DAYS = 3_650;
 
 export type ReviewRating = "again" | "hard" | "good" | "easy";

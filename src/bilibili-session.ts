@@ -219,7 +219,7 @@ export class BilibiliSessionService {
         webContents.on("did-navigate-in-page", checkLoginCookie);
       };
       const loginWindow = new remote.BrowserWindow({
-        title: "Lingua Study — 登录 B站",
+        title: "ListenBand — 登录 B站",
         width: 1080,
         height: 760,
         minWidth: 760,
@@ -353,7 +353,7 @@ export class BilibiliSessionService {
         if (availability.tracks.length > 0) {
           throw new BilibiliApiError(
             "no-english",
-            "该视频有独立字幕轨，但没有英文字幕。Lingua Study 不会把其他语言静默翻译成英文。"
+            "该视频有独立字幕轨，但没有英文字幕。ListenBand 不会把其他语言静默翻译成英文。"
           );
         }
         throw new BilibiliApiError(

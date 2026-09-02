@@ -21,7 +21,7 @@ const SOURCE_URL =
   `https://raw.githubusercontent.com/skywind3000/ECDICT/${SOURCE_REVISION}/ecdict.csv`;
 const RELEASE_ARCHIVE_NAME = `ecdict-${SOURCE_REVISION}.zip`;
 const RELEASE_ARCHIVE_URL =
-  `https://github.com/ObsidianRelay/lingua-study/releases/download/dictionary-${SOURCE_REVISION}/${RELEASE_ARCHIVE_NAME}`;
+  `https://github.com/xcc-ordinary/ListenBand/releases/download/dictionary-${SOURCE_REVISION}/${RELEASE_ARCHIVE_NAME}`;
 const RELEASE_ARCHIVE_SHA256 = "74e2993be40623059a10a8b605a452333d4a8d006b7d0e18186bf0ee3064d37f";
 const MAX_SOURCE_BYTES = 90 * 1024 * 1024;
 const MAX_ARCHIVE_BYTES = 40 * 1024 * 1024;
@@ -94,14 +94,14 @@ export function getFullDictionaryCacheFolder(
   environment: NodeJS.ProcessEnv = process.env
 ): string {
   if (platform === "darwin") {
-    return join(homeDirectory, "Library", "Caches", "Lingua Study", "Dictionary");
+    return join(homeDirectory, "Library", "Caches", "ListenBand", "Dictionary");
   }
   if (platform === "win32") {
     const base = environment.LOCALAPPDATA || join(homeDirectory, "AppData", "Local");
-    return join(base, "Lingua Study", "Cache", "Dictionary");
+    return join(base, "ListenBand", "Cache", "Dictionary");
   }
   const base = environment.XDG_CACHE_HOME || join(homeDirectory, ".cache");
-  return join(base, "lingua-study", "dictionary");
+  return join(base, "listenband", "dictionary");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

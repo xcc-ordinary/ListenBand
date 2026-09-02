@@ -1,4 +1,4 @@
-const STUDY_FENCE_OPEN_PATTERN = /^\s*```(?:lingua-study|english-video-study)\s*$/u;
+const STUDY_FENCE_OPEN_PATTERN = /^\s*```(?:listenband|lingua-study|english-video-study)\s*$/u;
 const FENCE_CLOSE_PATTERN = /^\s*```\s*$/u;
 
 export interface StudyBlockCursorRecovery {
@@ -31,7 +31,7 @@ function findStudyBlockContainingLine(
 }
 
 /**
- * 只识别已经闭合的 Lingua Study 围栏代码块，避免普通或尚未写完的代码块
+ * 只识别已经闭合的 ListenBand 围栏代码块，避免普通或尚未写完的代码块
  * 触发 Live Preview 的播放器恢复逻辑。
  */
 export function containsStudyBlock(lines: readonly string[]): boolean {

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { join } from "node:path";
 import {
   getWhisperCacheFolder,
   isWhisperModelCacheUrl,
@@ -14,11 +15,11 @@ import {
 test("本地 Whisper 缓存位置不会写入 Obsidian 笔记库", () => {
   assert.equal(
     getWhisperCacheFolder("darwin", "/Users/test", {}),
-    "/Users/test/Library/Caches/Lingua Study/Whisper Alignment"
+    join("/Users/test", "Library", "Caches", "ListenBand", "Whisper Alignment")
   );
   assert.equal(
     getWhisperCacheFolder("linux", "/home/test", { XDG_CACHE_HOME: "/cache" }),
-    "/cache/lingua-study/whisper-alignment"
+    join("/cache", "listenband", "whisper-alignment")
   );
 });
 

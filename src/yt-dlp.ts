@@ -143,7 +143,7 @@ export async function fetchTranscriptWithYtDlp(
     };
   }
 
-  const tempFolder = await mkdtemp(join(tmpdir(), "lingua-study-ytdlp-"));
+  const tempFolder = await mkdtemp(join(tmpdir(), "listenband-ytdlp-"));
   let combinedOutput = "";
   try {
     const outputTemplate = join(tempFolder, "%(id)s.%(ext)s");

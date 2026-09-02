@@ -13,13 +13,13 @@ export function getDefaultBilibiliCacheFolder(
   environment: Readonly<Record<string, string | undefined>>
 ): string {
   if (platform === "darwin") {
-    return join(homeDirectory, "Library", "Caches", "Lingua Study", "Bilibili");
+    return join(homeDirectory, "Library", "Caches", "ListenBand", "Bilibili");
   }
   if (platform === "win32") {
     const localAppData = environment.LOCALAPPDATA?.trim();
     return join(
       localAppData && localAppData !== "" ? localAppData : join(homeDirectory, "AppData", "Local"),
-      "Lingua Study",
+      "ListenBand",
       "Cache",
       "Bilibili"
     );
@@ -27,7 +27,7 @@ export function getDefaultBilibiliCacheFolder(
   const xdgCacheHome = environment.XDG_CACHE_HOME?.trim();
   return join(
     xdgCacheHome && xdgCacheHome !== "" ? xdgCacheHome : join(homeDirectory, ".cache"),
-    "lingua-study",
+    "listenband",
     "bilibili"
   );
 }

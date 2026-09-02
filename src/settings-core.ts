@@ -2,7 +2,7 @@ import { DEFAULT_TRANSCRIPT_FOLDER, sanitizeTranscriptFolder } from "./import-co
 import type { DeepSeekModel, KimiModel, TranslationProvider } from "./translation-core";
 import type { StudyProfile } from "./study-core";
 
-export interface LinguaStudySettings {
+export interface ListenBandSettings {
   transcriptFolder: string;
   ytDlpPath: string;
   autoImportPastedVideoLinks: boolean;
@@ -20,10 +20,10 @@ export interface LinguaStudySettings {
   dailyNewWordLimit: number;
 }
 
-export const DEFAULT_SETTINGS: LinguaStudySettings = {
+export const DEFAULT_SETTINGS: ListenBandSettings = {
   transcriptFolder: DEFAULT_TRANSCRIPT_FOLDER,
   ytDlpPath: "",
-  // 默认由用户点击左侧 Lingua Study Logo 后开始导入，避免粘贴资料时误触发。
+  // 默认由用户点击左侧 ListenBand Logo 后开始导入，避免粘贴资料时误触发。
   autoImportPastedVideoLinks: false,
   translationProvider: "disabled",
   // 默认只处理用户当前选择的句子，避免新用户误触整篇翻译并产生额外费用。
@@ -41,7 +41,7 @@ export const DEFAULT_SETTINGS: LinguaStudySettings = {
 };
 
 /** 读取旧配置时只保留仍受支持的字段；旧 whisperModel 会在这里被移除。 */
-export function sanitizeSettings(value: unknown): LinguaStudySettings {
+export function sanitizeSettings(value: unknown): ListenBandSettings {
   if (!value || typeof value !== "object") {
     return { ...DEFAULT_SETTINGS };
   }

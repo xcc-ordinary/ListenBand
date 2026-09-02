@@ -33,8 +33,8 @@ const entry: StudyCacheEntry = {
 
 test("知识卡缓存使用独立路径并保留不同指纹", () => {
   assert.equal(
-    getStudyCachePath("Lingua Study/Transcripts/video.json"),
-    "Lingua Study/Transcripts/video.zh-CN.study.json"
+    getStudyCachePath("ListenBand/Transcripts/video.json"),
+    "ListenBand/Transcripts/video.zh-CN.study.json"
   );
   let cache = createEmptyStudyCache("video");
   cache = upsertStudyCacheEntry(cache, "a".repeat(64), entry);

@@ -160,19 +160,19 @@ test("字幕指纹稳定且会随时间或原文变化", async () => {
   const first = await createSegmentFingerprint(
     4,
     13,
-    "Thank you for using Lingua Study.",
+    "Thank you for using ListenBand.",
     cryptoProvider
   );
   const same = await createSegmentFingerprint(
     4,
     13,
-    "Thank you for using Lingua Study.",
+    "Thank you for using ListenBand.",
     cryptoProvider
   );
   const changed = await createSegmentFingerprint(
     4,
     14,
-    "Thank you for using Lingua Study.",
+    "Thank you for using ListenBand.",
     cryptoProvider
   );
 

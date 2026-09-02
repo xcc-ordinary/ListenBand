@@ -2,7 +2,7 @@
 
 ## YTranscript
 
-Lingua Study includes a keyless adaptation of a YouTube mobile-client InnerTube
+ListenBand includes a keyless adaptation of a YouTube mobile-client InnerTube
 fallback based on [YTranscript](https://github.com/lstrzepek/obsidian-yt-transcript).
 
 MIT License
@@ -29,18 +29,18 @@ SOFTWARE.
 
 ## yt-dlp
 
-Lingua Study does not bundle or redistribute yt-dlp. If the user has installed
+ListenBand does not bundle or redistribute yt-dlp. If the user has installed
 yt-dlp separately, the desktop plugin can invoke that local executable as an
 optional subtitle-only fallback. See the
 [yt-dlp project](https://github.com/yt-dlp/yt-dlp) for its license and releases.
 
 ## ECDICT
 
-Lingua Study includes a compressed subset of the
+ListenBand includes a compressed subset of the
 [ECDICT English-Chinese dictionary database](https://github.com/skywind3000/ECDICT),
 filtered to CET-4, CET-6, IELTS-tagged, and high-frequency entries. The bundled
 snapshot is based on revision `bc015ed2e24a`. Users can optionally download the
-full CSV from that same revision; Lingua Study verifies its checksum and builds
+full CSV from that same revision; ListenBand verifies its checksum and builds
 local compressed indexes in the operating-system cache.
 
 MIT License
@@ -93,14 +93,14 @@ SOFTWARE.
 
 ## PDF.js
 
-Lingua Study bundles [PDF.js](https://github.com/mozilla/pdf.js) through the
+ListenBand bundles [PDF.js](https://github.com/mozilla/pdf.js) through the
 `pdfjs-dist` package for extracting selectable text from imported PDF files.
 PDF.js is licensed under the
 [Apache License 2.0](https://github.com/mozilla/pdf.js/blob/master/LICENSE).
 
 ## Transformers.js
 
-Lingua Study bundles
+ListenBand bundles
 [`@huggingface/transformers`](https://github.com/huggingface/transformers.js)
 3.8.1 for the optional local Whisper Base English alignment worker.
 Transformers.js is licensed under the
@@ -108,7 +108,7 @@ Transformers.js is licensed under the
 
 ## Mammoth.js
 
-Lingua Study bundles [Mammoth.js](https://github.com/mwilliamson/mammoth.js)
+ListenBand bundles [Mammoth.js](https://github.com/mwilliamson/mammoth.js)
 for extracting structured text from imported DOCX files.
 
 BSD 2-Clause License

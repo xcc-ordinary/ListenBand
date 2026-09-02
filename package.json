@@ -1,10 +1,10 @@
 {
   "name": "listenband",
-  "version": "1.2.2",
+  "version": "1.0.0",
   "description": "Study languages in Obsidian with YouTube and Bilibili transcripts, cached playback, and on-demand translation.",
   "private": true,
   "license": "MIT",
-  "author": "xiaobai",
+  "author": "Sisyphe",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xcc-ordinary/ListenBand.git"

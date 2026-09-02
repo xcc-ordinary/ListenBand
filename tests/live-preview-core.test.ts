@@ -6,11 +6,11 @@ import {
   getStudyBlockCursorRecovery
 } from "../src/live-preview-core";
 
-test("识别已经闭合的 Lingua Study 代码块", () => {
+test("识别已经闭合的 ListenBand 代码块", () => {
   const lines = [
     "# 未命名",
     "",
-    "```lingua-study",
+    "```listenband",
     "platform: bilibili",
     "bvid: BV1Gf4y1y7wc",
     "```"
@@ -22,7 +22,7 @@ test("识别已经闭合的 Lingua Study 代码块", () => {
 test("兼容旧代码块名称", () => {
   const lines = [
     "```english-video-study",
-    "transcript: Lingua Study/Transcripts/example.json",
+    "transcript: ListenBand/Transcripts/example.json",
     "```",
     "后续说明"
   ];
@@ -32,13 +32,13 @@ test("兼容旧代码块名称", () => {
 
 test("普通代码块和未闭合代码块不触发恢复", () => {
   assert.equal(containsStudyBlock(["```json", "{}", "```"]), false);
-  assert.equal(containsStudyBlock(["```lingua-study", "transcript: a.json"]), false);
+  assert.equal(containsStudyBlock(["```listenband", "transcript: a.json"]), false);
 });
 
 test("代码块位于文件末尾时创建代码块外的安全光标行", () => {
   const lines = [
-    "```lingua-study",
-    "transcript: Lingua Study/Transcripts/example.json",
+    "```listenband",
+    "transcript: ListenBand/Transcripts/example.json",
     "```"
   ];
 
@@ -64,5 +64,5 @@ test("光标在代码块外时不移动，已有后续行时不追加换行", ()
     exitLine: 3,
     needsTrailingLine: false
   });
-  assert.equal(addStudyBlockExitLine("```lingua-study\n```\n"), "```lingua-study\n```\n");
+  assert.equal(addStudyBlockExitLine("```listenband\n```\n"), "```listenband\n```\n");
 });

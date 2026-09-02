@@ -28,19 +28,19 @@ const packageJson = readJson("package.json");
 const packageLock = readJson("package-lock.json");
 const versions = readJson("versions.json");
 
-if (manifest.id !== "lingua-study") {
-  failures.push("manifest.json id must be lingua-study");
+if (manifest.id !== "listenband") {
+  failures.push("manifest.json id must be listenband");
 }
-if (manifest.name !== "Lingua Study") {
-  failures.push("manifest.json name must be Lingua Study");
+if (manifest.name !== "ListenBand") {
+  failures.push("manifest.json name must be ListenBand");
 }
 if (!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(manifest.version)) {
   failures.push("manifest.json version must use x.y.z format");
 }
-if (manifest.author !== "xiaobai") {
-  failures.push("manifest.json author must be xiaobai");
+if (manifest.author !== "Sisyphe") {
+  failures.push("manifest.json author must be Sisyphe");
 }
-if (manifest.authorUrl !== "https://github.com/ObsidianRelay") {
+if (manifest.authorUrl !== "https://github.com/xcc-ordinary") {
   failures.push("manifest.json authorUrl does not match the public GitHub account");
 }
 if (packageJson.version !== manifest.version || packageLock.version !== manifest.version) {
@@ -58,5 +58,5 @@ if (failures.length > 0) {
   }
   process.exitCode = 1;
 } else {
-  console.log(`Release metadata is consistent for Lingua Study ${manifest.version}.`);
+  console.log(`Release metadata is consistent for ListenBand ${manifest.version}.`);
 }

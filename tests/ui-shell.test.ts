@@ -35,14 +35,14 @@ test("对齐结果使用统一总时间轴和逐句人工校准", async () => {
   assert.match(source, /this\.getSegmentOffset\(nextIndex\)/u);
   assert.match(source, /findAlignmentTimingIssues/u);
   assert.match(source, /this\.applyAlignmentButton\.disabled = issueIndexes\.length > 0/u);
-  assert.match(source, /lingua-study-alignment-time-input/u);
+  assert.match(source, /listenband-alignment-time-input/u);
   assert.match(source, /type: "text"/u);
   assert.match(core, /formatAlignmentTime/u);
   assert.match(core, /validateAlignmentBoundary/u);
-  assert.match(css, /\.lingua-study-alignment-seek/u);
-  assert.match(css, /\.lingua-study-alignment-row\.is-active-calibration/u);
-  assert.match(css, /\.lingua-study-alignment-time-input\.is-invalid/u);
-  assert.match(css, /\.lingua-study-calibration-feedback\.is-error/u);
+  assert.match(css, /\.listenband-alignment-seek/u);
+  assert.match(css, /\.listenband-alignment-row\.is-active-calibration/u);
+  assert.match(css, /\.listenband-alignment-time-input\.is-invalid/u);
+  assert.match(css, /\.listenband-calibration-feedback\.is-error/u);
 });
 
 test("字幕导入会话保留草稿并避免同一视频重复启动", async () => {
@@ -134,32 +134,32 @@ test("左侧 Logo 提供手动视频创建入口并保留可选自动化", async
     readFile("src/settings.ts", "utf8"),
     readFile("styles.css", "utf8")
   ]);
-  assert.match(source, /addIcon\(LINGUA_STUDY_RIBBON_ICON_ID, LINGUA_STUDY_RIBBON_ICON_SVG\)/u);
+  assert.match(source, /addIcon\(LISTENBAND_RIBBON_ICON_ID, LISTENBAND_RIBBON_ICON_SVG\)/u);
   assert.match(source, /this\.addRibbonIcon\(/u);
-  assert.match(source, /LINGUA_STUDY_RIBBON_ICON_ID,\s*"Lingua Study"/u);
+  assert.match(source, /LISTENBAND_RIBBON_ICON_ID,\s*"ListenBand"/u);
   assert.match(source, /ribbonLogoMaskUrl/u);
-  assert.match(source, /--lingua-study-logo-mask/u);
+  assert.match(source, /--listenband-logo-mask/u);
   assert.match(source, /findSupportedVideoLinksByPriority/u);
   assert.match(source, /import-video-from-current-note/u);
-  assert.match(source, /setAttribute\("aria-label", "Lingua Study"\)/u);
+  assert.match(source, /setAttribute\("aria-label", "ListenBand"\)/u);
   assert.doesNotMatch(source, /从当前笔记的视频链接创建语言学习内容/u);
-  assert.match(settings, /默认关闭：粘贴链接后点击左侧 Lingua Study Logo 手动创建/u);
+  assert.match(settings, /默认关闭：粘贴链接后点击左侧 ListenBand Logo 手动创建/u);
   assert.match(settings, /key: "autoImportPastedVideoLinks"/u);
-  assert.match(css, /\.side-dock-ribbon-action\.lingua-study-ribbon-action:hover/u);
-  assert.match(css, /mask-image: var\(--lingua-study-logo-mask\)/u);
-  assert.match(css, /\.lingua-study-manual-video-choice/u);
+  assert.match(css, /\.side-dock-ribbon-action\.listenband-ribbon-action:hover/u);
+  assert.match(css, /mask-image: var\(--listenband-logo-mask\)/u);
+  assert.match(css, /\.listenband-manual-video-choice/u);
 });
 
 test("设置页样式统一导航卡片、状态和窄窗口布局", async () => {
   const css = await readFile("styles.css", "utf8");
-  assert.match(css, /\.lingua-study-settings \.setting-item:has\(\.setting-item-chevron\)/u);
-  assert.match(css, /\.setting-page:has\(\.lingua-study-settings-section\) \.setting-page-title/u);
+  assert.match(css, /\.listenband-settings \.setting-item:has\(\.setting-item-chevron\)/u);
+  assert.match(css, /\.setting-page:has\(\.listenband-settings-section\) \.setting-page-title/u);
   assert.match(css, /font-family: var\(--font-interface\);/u);
-  assert.match(css, /\.lingua-study-settings-status \{[\s\S]*?white-space: nowrap;/u);
-  assert.match(css, /\.lingua-study-settings-section \.setting-item-description \{[\s\S]*?overflow-wrap: anywhere;/u);
+  assert.match(css, /\.listenband-settings-status \{[\s\S]*?white-space: nowrap;/u);
+  assert.match(css, /\.listenband-settings-section \.setting-item-description \{[\s\S]*?overflow-wrap: anywhere;/u);
   assert.match(css, /background: var\(--interactive-hover\);/u);
-  assert.match(css, /\.lingua-study-settings-section \.setting-item-control \{[\s\S]*?flex-wrap: wrap;/u);
-  assert.match(css, /\.setting-page:has\(\.lingua-study-settings-section\)\) \[hidden\] \{[\s\S]*?display: none !important;/u);
+  assert.match(css, /\.listenband-settings-section \.setting-item-control \{[\s\S]*?flex-wrap: wrap;/u);
+  assert.match(css, /\.setting-page:has\(\.listenband-settings-section\)\) \[hidden\] \{[\s\S]*?display: none !important;/u);
   assert.match(css, /@media \(max-width: 700px\) \{[\s\S]*?flex-direction: column;/u);
 });
 
@@ -248,8 +248,8 @@ test("播放器铺满阅读视图并完整释放观察器", async () => {
   assert.match(source, /this\.resumeTranscriptAutoFollow\(true\)/u);
   assert.match(source, /const TRANSCRIPT_AUTO_FOLLOW_RESUME_DELAY_MS = 5_000;/u);
   assert.match(source, /window\.setTimeout\(\(\) => \{[\s\S]*?this\.transcriptAutoFollowEnabled = true;[\s\S]*?TRANSCRIPT_AUTO_FOLLOW_RESUME_DELAY_MS/u);
-  assert.match(source, /host\.classList\.add\("lingua-study-full-width-host"\)/u);
-  assert.match(source, /host\.classList\.remove\("lingua-study-full-width-host"\)/u);
+  assert.match(source, /host\.classList\.add\("listenband-full-width-host"\)/u);
+  assert.match(source, /host\.classList\.remove\("listenband-full-width-host"\)/u);
   assert.match(source, /this\.overrideLivePreviewHostStyle\(host, "contain", "none"\)/u);
   assert.match(source, /this\.overrideLivePreviewHostStyle\(host, "overflow", "visible"\)/u);
   assert.match(source, /host\.style\.setProperty\(property, value, "important"\)/u);
@@ -297,10 +297,10 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(css, /\.evs-transcript \{[\s\S]*?overflow-y: auto;/u);
   assert.match(css, /\.evs-player-dock \{[\s\S]*?position: relative;[\s\S]*?width: min\(100%, 680px\);/u);
   assert.match(css, /\.evs-player-dock\.is-floating \{[\s\S]*?position: sticky;[\s\S]*?top: 8px;/u);
-  assert.match(css, /\.cm-preview-code-block\.cm-lang-lingua-study/u);
+  assert.match(css, /\.cm-preview-code-block\.cm-lang-listenband/u);
   assert.match(css, /\.cm-preview-code-block\.cm-lang-english-video-study/u);
-  assert.match(css, /\.cm-embed-block\.cm-lang-lingua-study/u);
-  assert.match(css, /\.lingua-study-full-width-host[\s\S]*?contain: none !important;[\s\S]*?overflow: visible !important;/u);
+  assert.match(css, /\.cm-embed-block\.cm-lang-listenband/u);
+  assert.match(css, /\.listenband-full-width-host[\s\S]*?contain: none !important;[\s\S]*?overflow: visible !important;/u);
   assert.doesNotMatch(css, /:has\(\.evs-root\)/u);
   assert.match(css, /\.evs-player-stage \{[\s\S]*?position: relative;/u);
   assert.match(css, /\.evs-loading-player \{[\s\S]*?aspect-ratio: 16 \/ 9;/u);
@@ -320,7 +320,7 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(css, /\.evs-speed-labels \{[\s\S]*?grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);/u);
   assert.match(css, /\.evs-toolbar > \.evs-source-link \{[\s\S]*?width: 32px;[\s\S]*?height: 32px;[\s\S]*?border: 0;[\s\S]*?border-radius: 7px;[\s\S]*?box-shadow: inset 0 0 0 1px var\(--background-modifier-border\);/u);
   assert.match(css, /\.evs-toolbar > \.evs-add-transcript-button/u);
-  assert.match(css, /\.lingua-study-document-import-modal/u);
+  assert.match(css, /\.listenband-document-import-modal/u);
   assert.doesNotMatch(css, /\.evs-speed-group \+ \.evs-source-link|\.evs-speed-group:has\(\+ \.evs-source-link\)/u);
   assert.doesNotMatch(css, /\.evs-speed-button|\.evs-speed-value|--evs-speed-progress/u);
   assert.doesNotMatch(css, /\.evs-speed-options|\.evs-speed-toggle|\.evs-floating-toolbar/u);
@@ -332,16 +332,18 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(mainSource, /createListeningModeButton/u);
   assert.match(mainSource, /playIntensiveSegment/u);
   assert.match(mainSource, /stopIntensiveSegmentAtBoundary/u);
-  assert.match(mainSource, /英文已隐藏，请先完整听写这一句/u);
+  assert.match(mainSource, /原文已隐藏，请在下方默写这一句/u);
   assert.match(mainSource, /intensiveSentenceRevealed = false/u);
   assert.match(css, /\.evs-intensive-reveal \{/u);
-  assert.match(mainSource, /开始默写/u);
+  assert.doesNotMatch(mainSource, /开始默写/u);
   assert.match(mainSource, /你的默写/u);
   assert.match(mainSource, /显示原文/u);
   assert.match(mainSource, /normalizeDictationText/u);
   assert.match(css, /\.evs-intensive-dictation \{/u);
   assert.match(css, /\.evs-intensive-dictation-input \{/u);
   assert.match(css, /\.evs-intensive-comparison \{/u);
+  assert.match(css, /font-size: clamp\(25px, 3\.5vw, 48px\);/u);
+  assert.match(css, /\.evs-intensive-button:active:not\(:disabled\)/u);
   assert.doesNotMatch(css, /\.evs-transcript-tools/u);
   assert.doesNotMatch(css, /data:image|--evs-cork|paper-texture/u);
   assert.doesNotMatch(css, /width: 995px|height: 1581px|\.evs-scale-stage/u);
@@ -357,7 +359,7 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(css, /\.lingua-dictionary-profile select:hover[\s\S]*?background-color: var\(--interactive-accent\) !important;/u);
   assert.match(css, /\.lingua-vocabulary-controls select:hover/u);
   assert.match(css, /\.lingua-dictionary-profile select:focus-visible/u);
-  assert.match(css, /\.setting-page:has\(\.lingua-study-settings-section\)[^}]*button:not\(:disabled\):not\(\.mod-warning\):not\(\.mod-destructive\):hover/u);
+  assert.match(css, /\.setting-page:has\(\.listenband-settings-section\)[^}]*button:not\(:disabled\):not\(\.mod-warning\):not\(\.mod-destructive\):hover/u);
   assert.match(css, /\.lingua-dictionary-tabs button\.is-active \{[\s\S]*?background: var\(--interactive-accent\);/u);
   assert.match(css, /\.lingua-dictionary-tabs button\.is-active \{[\s\S]*?color: var\(--text-on-accent\);/u);
   assert.match(css, /\.lingua-dictionary-tabs button\.is-active \{[\s\S]*?font-weight: 700;/u);
@@ -412,7 +414,7 @@ test("生词本使用独立串行存储并注册两个入口命令", async () =>
   assert.doesNotMatch(dictionaryView, /playVocabularyContext|播放本句|播放这一句/u);
   assert.match(store, /private readonly writeQueue = new AsyncKeyedQueue/u);
   assert.match(store, /this\.app\.vault\.process/u);
-  assert.match(core, /Lingua Study\/Vocabulary\/wordbook\.json/u);
+  assert.match(core, /ListenBand\/Vocabulary\/wordbook\.json/u);
   assert.match(core, /10 \* 60 \* 1_000/u);
 });
 

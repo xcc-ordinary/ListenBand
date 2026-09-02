@@ -36,7 +36,7 @@ function addInput(now: Date, start = 6): VocabularyAddInput {
     context: {
       sentence: "She studies every day.",
       sourcePath: "视频学习/测试.md",
-      transcriptPath: "Lingua Study/Transcripts/test.json",
+      transcriptPath: "ListenBand/Transcripts/test.json",
       videoId: "test-video",
       segmentIndex: 0,
       start,

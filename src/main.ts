@@ -14,9 +14,9 @@ import {
 } from "obsidian";
 import {
   DEFAULT_SETTINGS,
-  LinguaStudySettingTab,
+  ListenBandSettingTab,
   sanitizeSettings,
-  type LinguaStudySettings
+  type ListenBandSettings
 } from "./settings";
 import {
   TranslationCacheStore,
@@ -178,8 +178,8 @@ const PLAYER_COMMAND_TIMEOUT_MS = 3_000;
 const LOCAL_MEDIA_LOAD_TIMEOUT_MS = 8_000;
 const LOCAL_STATUS_READY_DELAY_MS = 1_200;
 const TRANSCRIPT_AUTO_FOLLOW_RESUME_DELAY_MS = 5_000;
-const LINGUA_STUDY_RIBBON_ICON_ID = "lingua-study-logo";
-const LINGUA_STUDY_RIBBON_ICON_SVG = `
+const LISTENBAND_RIBBON_ICON_ID = "listenband-logo";
+const LISTENBAND_RIBBON_ICON_SVG = `
   <path d="M3.5 7c3.1-1 6-.15 8.5 2.25C14.5 6.85 17.4 6 20.5 7v10c-3.05-.85-5.95 0-8.5 2.3C9.45 17 6.55 16.15 3.5 17Z" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M12 9.25v10.05M11.9 9.1c-2.7-1.3-3.9-2.8-2.85-4.4 1.2-1.85 4.25-1.2 4.45.75.15 1.45-.8 2.45-1.6 3.65ZM12.1 9.1c2.05-1 2.8-2.35 1.75-3.45-1.05-1.1-2.85-.3-2.55 1.15" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
 `;
@@ -206,7 +206,7 @@ class ManualVideoLinkModal extends Modal {
   private resolved = false;
 
   constructor(
-    app: LinguaStudyPlugin["app"],
+    app: ListenBandPlugin["app"],
     private readonly links: PastedVideoLink[],
     private readonly resolveValue: (value: PastedVideoLink | null) => void
   ) {
@@ -218,9 +218,9 @@ class ManualVideoLinkModal extends Modal {
     this.contentEl.createEl("p", {
       text: "当前范围内找到多个视频链接。请选择本次要处理的一个，其他链接不会被修改。"
     });
-    const list = this.contentEl.createDiv({ cls: "lingua-study-manual-video-list" });
+    const list = this.contentEl.createDiv({ cls: "listenband-manual-video-list" });
     for (const item of this.links) {
-      const button = list.createEl("button", { cls: "lingua-study-manual-video-choice" });
+      const button = list.createEl("button", { cls: "listenband-manual-video-choice" });
       let label: string;
       if (item.platform === "youtube") {
         label = `YouTube · ${item.link.videoId}`;
@@ -229,14 +229,14 @@ class ManualVideoLinkModal extends Modal {
       } else {
         label = `B站 · ${item.link.videoId}${item.link.page > 1 ? ` · 第 ${item.link.page} P` : ""}`;
       }
-      button.createSpan({ cls: "lingua-study-manual-video-label", text: label });
+      button.createSpan({ cls: "listenband-manual-video-label", text: label });
       button.createSpan({
-        cls: "lingua-study-manual-video-url",
+        cls: "listenband-manual-video-url",
         text: item.link.originalUrl
       });
       button.addEventListener("click", () => this.finish(item));
     }
-    const actions = this.contentEl.createDiv({ cls: "lingua-study-import-actions" });
+    const actions = this.contentEl.createDiv({ cls: "listenband-import-actions" });
     actions.createEl("button", { text: "取消" }).addEventListener("click", () => this.finish(null));
   }
 
@@ -356,7 +356,7 @@ function buildBilibiliSourceUrl(config: BilibiliCodeBlockConfig): string {
 
 class EditTranscriptSegmentModal extends Modal {
   constructor(
-    app: LinguaStudyPlugin["app"],
+    app: ListenBandPlugin["app"],
     private readonly currentText: string,
     private readonly originalText: string | undefined,
     private readonly onSave: (text: string) => Promise<void>
@@ -376,8 +376,8 @@ class EditTranscriptSegmentModal extends Modal {
     });
     textarea.value = this.currentText;
     textarea.setAttribute("aria-label", "英文字幕正文");
-    const errorEl = this.contentEl.createDiv({ cls: "lingua-study-import-error" });
-    const actions = this.contentEl.createDiv({ cls: "lingua-study-import-actions" });
+    const errorEl = this.contentEl.createDiv({ cls: "listenband-import-error" });
+    const actions = this.contentEl.createDiv({ cls: "listenband-import-actions" });
     const saveButton = actions.createEl("button", { cls: "mod-cta", text: "保存字幕" });
     actions.createEl("button", { text: "取消" }).addEventListener("click", () => this.close());
 
@@ -406,8 +406,8 @@ class EditTranscriptSegmentModal extends Modal {
   }
 }
 
-class LinguaStudyRenderChild extends MarkdownRenderChild {
-  private readonly plugin: LinguaStudyPlugin;
+class ListenBandRenderChild extends MarkdownRenderChild {
+  private readonly plugin: ListenBandPlugin;
   private readonly source: string;
   private readonly sourcePath: string;
   private iframeEl: HTMLIFrameElement | null = null;
@@ -441,11 +441,8 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
   private intensiveSentenceEl: HTMLElement | null = null;
   private intensiveRevealButton: HTMLButtonElement | null = null;
   private intensiveSentenceRevealed = false;
-  private intensiveDictationActive = false;
   private intensiveDictationDraft = "";
-  private intensiveDictationEl: HTMLElement | null = null;
   private intensiveDictationInput: HTMLTextAreaElement | null = null;
-  private intensiveDictationStartButton: HTMLButtonElement | null = null;
   private intensiveComparisonEl: HTMLElement | null = null;
   private intensivePositionEl: HTMLElement | null = null;
   private intensivePreviousButton: HTMLButtonElement | null = null;
@@ -513,7 +510,7 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
 
   constructor(
     containerEl: HTMLElement,
-    plugin: LinguaStudyPlugin,
+    plugin: ListenBandPlugin,
     source: string,
     sourcePath: string
   ) {
@@ -593,11 +590,8 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     this.intensiveSentenceEl = null;
     this.intensiveRevealButton = null;
     this.intensiveSentenceRevealed = false;
-    this.intensiveDictationActive = false;
     this.intensiveDictationDraft = "";
-    this.intensiveDictationEl = null;
     this.intensiveDictationInput = null;
-    this.intensiveDictationStartButton = null;
     this.intensiveComparisonEl = null;
     this.intensivePositionEl = null;
     this.intensivePreviousButton = null;
@@ -757,7 +751,7 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     const rootClass = extraClass === "" ? "evs-root" : `evs-root ${extraClass}`;
     const root = this.containerEl.createDiv({ cls: rootClass });
     this.rootEl = root;
-    root.dataset.linguaStudySourcePath = this.sourcePath;
+    root.dataset.listenBandSourcePath = this.sourcePath;
     const viewWindow = this.containerEl.ownerDocument.defaultView ?? window;
     if (this.fullWidthScrollFrame === null) {
       this.fullWidthScrollFrame = viewWindow.requestAnimationFrame(() => {
@@ -856,8 +850,8 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     }
 
     // CodeMirror 会在渲染后重新写入内联 contain: paint；CSS 类本身无法稳定覆盖。
-    // 这里只覆盖当前 Lingua Study 宿主，并在卸载时完整恢复原有内联样式。
-    host.classList.add("lingua-study-full-width-host");
+    // 这里只覆盖当前 ListenBand 宿主，并在卸载时完整恢复原有内联样式。
+    host.classList.add("listenband-full-width-host");
     this.overrideLivePreviewHostStyle(host, "contain", "none");
     this.overrideLivePreviewHostStyle(host, "overflow", "visible");
   }
@@ -875,7 +869,7 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     this.livePreviewHostMutationObserver = null;
     const host = this.livePreviewHostEl;
     if (host) {
-      host.classList.remove("lingua-study-full-width-host");
+      host.classList.remove("listenband-full-width-host");
       const previous = this.livePreviewHostStyleBefore;
       if (previous?.contain) {
         host.style.setProperty("contain", previous.contain, previous.containPriority);
@@ -1430,21 +1424,9 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     sentence.setAttribute("aria-live", "polite");
     this.intensiveSentenceEl = sentence;
     const actions = focus.createDiv({ cls: "evs-intensive-focus-actions" });
-    const startDictation = actions.createEl("button", {
-      cls: "evs-button evs-intensive-dictation-start",
-      text: "开始默写"
-    });
-    startDictation.type = "button";
-    startDictation.addEventListener("click", () => {
-      this.intensiveDictationActive = true;
-      this.intensiveSentenceRevealed = false;
-      this.updateIntensiveListeningPanel();
-      window.setTimeout(() => this.intensiveDictationInput?.focus(), 0);
-    });
-    this.intensiveDictationStartButton = startDictation;
     const reveal = actions.createEl("button", {
       cls: "evs-button evs-intensive-reveal",
-      text: "显示英文"
+      text: "显示原文"
     });
     reveal.type = "button";
     reveal.setAttribute("aria-pressed", "false");
@@ -1473,8 +1455,6 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     this.intensiveComparisonEl = dictation.createDiv({
       cls: "evs-intensive-comparison"
     });
-    this.intensiveDictationEl = dictation;
-
     const controls = panel.createDiv({ cls: "evs-intensive-controls" });
     this.intensivePreviousButton = this.createIntensiveButton(
       controls,
@@ -1528,7 +1508,6 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
       this.intensiveSegmentIndex = selected;
       this.intensiveStopArmed = false;
       this.intensiveSentenceRevealed = false;
-      this.intensiveDictationActive = false;
       this.intensiveDictationDraft = "";
       if (this.localVideoEl && !this.localVideoEl.paused) {
         this.localVideoEl.pause();
@@ -1552,9 +1531,7 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     this.intensiveSentenceEl?.setText(
       this.intensiveSentenceRevealed
         ? segment.text
-        : this.intensiveDictationActive
-          ? "原文已隐藏，请在下方默写这一句"
-          : "英文已隐藏，请先完整听写这一句"
+        : "原文已隐藏，请在下方默写这一句"
     );
     this.intensiveSentenceEl?.classList.toggle(
       "is-concealed",
@@ -1562,17 +1539,13 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     );
     if (this.intensiveRevealButton) {
       this.intensiveRevealButton.setText(
-        this.intensiveDictationActive
-          ? this.intensiveSentenceRevealed ? "隐藏原文" : "显示原文"
-          : this.intensiveSentenceRevealed ? "隐藏英文" : "显示英文"
+        this.intensiveSentenceRevealed ? "隐藏原文" : "显示原文"
       );
       this.intensiveRevealButton.setAttribute(
         "aria-pressed",
         this.intensiveSentenceRevealed.toString()
       );
     }
-    this.intensiveDictationEl?.toggleAttribute("hidden", !this.intensiveDictationActive);
-    this.intensiveDictationStartButton?.toggleAttribute("hidden", this.intensiveDictationActive);
     if (this.intensiveDictationInput && this.intensiveDictationInput.value !== this.intensiveDictationDraft) {
       this.intensiveDictationInput.value = this.intensiveDictationDraft;
     }
@@ -1598,7 +1571,6 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     this.intensiveStopArmed = true;
     this.intensiveSentenceRevealed = false;
     if (changingSentence) {
-      this.intensiveDictationActive = false;
       this.intensiveDictationDraft = "";
     }
     this.updateIntensiveListeningPanel();
@@ -1609,7 +1581,7 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
     if (!this.intensiveComparisonEl) {
       return;
     }
-    if (!this.intensiveSentenceRevealed || !this.intensiveDictationActive) {
+    if (!this.intensiveSentenceRevealed) {
       this.intensiveComparisonEl.empty();
       this.intensiveComparisonEl.toggleAttribute("hidden", true);
       return;
@@ -3240,8 +3212,8 @@ class LinguaStudyRenderChild extends MarkdownRenderChild {
   }
 }
 
-export default class LinguaStudyPlugin extends Plugin {
-  settings: LinguaStudySettings = { ...DEFAULT_SETTINGS };
+export default class ListenBandPlugin extends Plugin {
+  settings: ListenBandSettings = { ...DEFAULT_SETTINGS };
   private translationService: TranslationService | null = null;
   private translationCacheStore: TranslationCacheStore | null = null;
   private studyCacheStore: StudyCacheStore | null = null;
@@ -3250,10 +3222,10 @@ export default class LinguaStudyPlugin extends Plugin {
   private fullDictionaryService: FullDictionaryService | null = null;
   private readonly studyProfileListeners = new Set<(profile: StudyProfile) => void>();
   private readonly vocabularyListeners = new Set<() => void>();
-  private readonly studyRenderers = new Set<LinguaStudyRenderChild>();
-  private readonly studyRendererReadyOrder = new WeakMap<LinguaStudyRenderChild, number>();
+  private readonly studyRenderers = new Set<ListenBandRenderChild>();
+  private readonly studyRendererReadyOrder = new WeakMap<ListenBandRenderChild, number>();
   private studyRendererReadyCounter = 0;
-  private activeDictionaryHighlightOwner: LinguaStudyRenderChild | null = null;
+  private activeDictionaryHighlightOwner: ListenBandRenderChild | null = null;
   private pendingVocabularyJump: {
     id: number;
     context: VocabularyContext;
@@ -3317,20 +3289,20 @@ export default class LinguaStudyPlugin extends Plugin {
           sourceLabel
         )
     );
-    addIcon(LINGUA_STUDY_RIBBON_ICON_ID, LINGUA_STUDY_RIBBON_ICON_SVG);
+    addIcon(LISTENBAND_RIBBON_ICON_ID, LISTENBAND_RIBBON_ICON_SVG);
     this.manualImportRibbonEl = this.addRibbonIcon(
-      LINGUA_STUDY_RIBBON_ICON_ID,
-      "Lingua Study",
+      LISTENBAND_RIBBON_ICON_ID,
+      "ListenBand",
       () => {
         void this.importVideoFromActiveNote();
       }
     );
-    this.manualImportRibbonEl.addClass("lingua-study-ribbon-action");
+    this.manualImportRibbonEl.addClass("listenband-ribbon-action");
     this.manualImportRibbonEl.setCssProps({
-      "--lingua-study-logo-mask": `url("${ribbonLogoMaskUrl}")`
+      "--listenband-logo-mask": `url("${ribbonLogoMaskUrl}")`
     });
-    this.manualImportRibbonEl.setAttribute("aria-label", "Lingua Study");
-    this.addSettingTab(new LinguaStudySettingTab(this.app, this));
+    this.manualImportRibbonEl.setAttribute("aria-label", "ListenBand");
+    this.addSettingTab(new ListenBandSettingTab(this.app, this));
 
     this.addCommand({
       id: "open-offline-dictionary",
@@ -3440,9 +3412,10 @@ export default class LinguaStudyPlugin extends Plugin {
       el: HTMLElement,
       ctx: MarkdownPostProcessorContext
     ): void => {
-      ctx.addChild(new LinguaStudyRenderChild(el, this, source, ctx.sourcePath));
+      ctx.addChild(new ListenBandRenderChild(el, this, source, ctx.sourcePath));
     };
 
+    this.registerMarkdownCodeBlockProcessor("listenband", renderStudyBlock);
     this.registerMarkdownCodeBlockProcessor("lingua-study", renderStudyBlock);
     // 兼容 v0.1/v0.2 期间已经创建的旧笔记，避免用户必须立即批量修改。
     this.registerMarkdownCodeBlockProcessor(
@@ -3528,7 +3501,7 @@ export default class LinguaStudyPlugin extends Plugin {
 
       const rendered = Array.from(
         view.containerEl.querySelectorAll<HTMLElement>(".evs-root")
-      ).some((root) => root.dataset.linguaStudySourcePath === file.path);
+      ).some((root) => root.dataset.listenBandSourcePath === file.path);
       if (rendered) {
         this.cancelStudyBlockReveal();
         return;
@@ -3628,7 +3601,7 @@ export default class LinguaStudyPlugin extends Plugin {
     });
   }
 
-  async updateSettings(changes: Partial<LinguaStudySettings>): Promise<void> {
+  async updateSettings(changes: Partial<ListenBandSettings>): Promise<void> {
     const previousProfile = this.settings.studyProfile;
     const previousDailyNewWordLimit = this.settings.dailyNewWordLimit;
     this.settings = sanitizeSettings({ ...this.settings, ...changes });
@@ -3707,7 +3680,7 @@ export default class LinguaStudyPlugin extends Plugin {
 
   async testTranslationConnection(): Promise<string> {
     const result = await this.getTranslationService().translate(
-      "Thank you for using Lingua Study."
+      "Thank you for using ListenBand."
     );
     return result.text;
   }
@@ -3806,7 +3779,7 @@ export default class LinguaStudyPlugin extends Plugin {
     return leaf.view;
   }
 
-  activateDictionaryHighlight(owner: LinguaStudyRenderChild, element: HTMLElement): void {
+  activateDictionaryHighlight(owner: ListenBandRenderChild, element: HTMLElement): void {
     if (this.activeDictionaryHighlightOwner !== owner) {
       this.activeDictionaryHighlightOwner?.clearLookupHighlight();
     }
@@ -3819,11 +3792,11 @@ export default class LinguaStudyPlugin extends Plugin {
     this.activeDictionaryHighlightOwner = null;
   }
 
-  registerStudyRenderer(renderer: LinguaStudyRenderChild): void {
+  registerStudyRenderer(renderer: ListenBandRenderChild): void {
     this.studyRenderers.add(renderer);
   }
 
-  unregisterStudyRenderer(renderer: LinguaStudyRenderChild): void {
+  unregisterStudyRenderer(renderer: ListenBandRenderChild): void {
     this.studyRenderers.delete(renderer);
     if (this.activeDictionaryHighlightOwner === renderer) {
       renderer.clearLookupHighlight();
@@ -3831,7 +3804,7 @@ export default class LinguaStudyPlugin extends Plugin {
     }
   }
 
-  notifyStudyRendererReady(renderer: LinguaStudyRenderChild): void {
+  notifyStudyRendererReady(renderer: ListenBandRenderChild): void {
     this.studyRendererReadyCounter += 1;
     this.studyRendererReadyOrder.set(renderer, this.studyRendererReadyCounter);
     void this.tryResolveVocabularyJump();

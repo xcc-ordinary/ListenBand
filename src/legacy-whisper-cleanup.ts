@@ -11,12 +11,12 @@ const MANAGED_MODELS = [
 
 function getLinguaCacheRoot(): string {
   if (process.platform === "darwin") {
-    return join(homedir(), "Library", "Caches", "Lingua Study");
+    return join(homedir(), "Library", "Caches", "ListenBand");
   }
   if (process.platform === "win32") {
-    return join(process.env.LOCALAPPDATA?.trim() || join(homedir(), "AppData", "Local"), "Lingua Study", "Cache");
+    return join(process.env.LOCALAPPDATA?.trim() || join(homedir(), "AppData", "Local"), "ListenBand", "Cache");
   }
-  return join(process.env.XDG_CACHE_HOME?.trim() || join(homedir(), ".cache"), "lingua-study");
+  return join(process.env.XDG_CACHE_HOME?.trim() || join(homedir(), ".cache"), "listenband");
 }
 
 export function isManagedLegacyWhisperUrl(value: string): boolean {
@@ -58,6 +58,6 @@ export async function removeLegacyWhisperCachesOnce(): Promise<boolean> {
   await rm(join(cacheRoot, "Whisper"), { recursive: true, force: true });
   await rm(join(cacheRoot, "whisper"), { recursive: true, force: true });
   await mkdir(cacheRoot, { recursive: true });
-  await writeFile(markerPath, "Lingua Study 1.1.0\n", { encoding: "utf8", mode: 0o600 });
+  await writeFile(markerPath, "ListenBand 1.1.0\n", { encoding: "utf8", mode: 0o600 });
   return true;
 }

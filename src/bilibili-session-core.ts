@@ -1,4 +1,4 @@
-export const BILIBILI_SESSION_PARTITION = "persist:lingua-study-bilibili";
+export const BILIBILI_SESSION_PARTITION = "persist:listenband-bilibili";
 
 export interface BilibiliLoginWindowOpenResponse {
   action: "allow" | "deny";
@@ -58,7 +58,7 @@ export function hardenBilibiliLoginWindowOptions(
     : {};
   return {
     ...original,
-    title: "Lingua Study — B站安全验证",
+    title: "ListenBand — B站安全验证",
     width: typeof original.width === "number" ? original.width : 960,
     height: typeof original.height === "number" ? original.height : 720,
     minWidth: 640,
@@ -87,7 +87,7 @@ export function buildBilibiliLoginWindowOpenResponse(
     action: "allow",
     outlivesOpener: false,
     overrideBrowserWindowOptions: {
-      title: "Lingua Study — B站安全验证",
+      title: "ListenBand — B站安全验证",
       width: 960,
       height: 720,
       minWidth: 640,

@@ -11,7 +11,7 @@ test("yt-dlp 运行层会先查人工字幕、再读取自动字幕并清理临�
     return;
   }
 
-  const folder = await mkdtemp(join(tmpdir(), "lingua-study-fake-ytdlp-"));
+  const folder = await mkdtemp(join(tmpdir(), "listenband-fake-ytdlp-"));
   const executable = join(folder, "yt-dlp");
   const script = `#!/usr/bin/env node
 const fs = require("node:fs");

@@ -20,7 +20,7 @@ const candidates = process.platform === "darwin"
     : ["google-chrome", "chromium", "chromium-browser", "microsoft-edge"];
 
 const chrome = process.env.CHROME_BIN?.trim() || candidates[0];
-const temporaryRoot = await mkdtemp(join(tmpdir(), "lingua-study-ui-layout-"));
+const temporaryRoot = await mkdtemp(join(tmpdir(), "listenband-ui-layout-"));
 const profilePath = join(temporaryRoot, "chrome-profile");
 const fixturePath = join(temporaryRoot, "fixture.html");
 
@@ -88,7 +88,7 @@ try {
         <div class="evs-transcript" id="transcript"><div class="evs-segment-action-dock" id="segment-action-dock"><button class="evs-icon-button evs-transcript-icon-button"><svg class="svg-icon"></svg></button><button class="evs-icon-button evs-transcript-icon-button"><svg class="svg-icon"></svg></button></div>${rowMarkup}<div class="evs-transcript-end-spacer" id="spacer"></div></div>
     </div></div></div></div>
     <aside id="dictionary" class="lingua-dictionary-view">
-      <div class="lingua-dictionary-header"><h3>Lingua Study</h3><span class="lingua-dictionary-source">23,596 词条</span></div>
+      <div class="lingua-dictionary-header"><h3>ListenBand</h3><span class="lingua-dictionary-source">23,596 词条</span></div>
       <div class="lingua-dictionary-tabs"><button class="is-active">查词</button><button>生词本</button><button>今日复习 12</button></div>
       <div class="lingua-dictionary-body" id="dictionary-body">
         <form class="lingua-dictionary-search"><input value="antidepressants"><button>查询</button></form>
@@ -101,22 +101,22 @@ try {
         </div>
       </div>
     </aside></div>
-    <div id="import-modal" class="lingua-study-document-import-modal" style="position:fixed;left:-10000px;top:0">
+    <div id="import-modal" class="listenband-document-import-modal" style="position:fixed;left:-10000px;top:0">
       <div class="modal-content">
-        <textarea class="lingua-study-document-paste">${"A long imported transcript sentence. ".repeat(20)}</textarea>
-        <div class="lingua-study-document-preview">
-          <div class="lingua-study-document-row-list">
-            <div class="lingua-study-document-row">
-              <span class="lingua-study-document-row-number">1</span>
+        <textarea class="listenband-document-paste">${"A long imported transcript sentence. ".repeat(20)}</textarea>
+        <div class="listenband-document-preview">
+          <div class="listenband-document-row-list">
+            <div class="listenband-document-row">
+              <span class="listenband-document-row-number">1</span>
               <textarea>${"This is a deliberately long English sentence used to test imported document layout. ".repeat(8)}</textarea>
               <textarea>${"这是一段用于检查文稿导入布局的长中文。".repeat(12)}</textarea>
-              <div class="lingua-study-document-row-actions"><button></button><button></button><button></button><button></button></div>
+              <div class="listenband-document-row-actions"><button></button><button></button><button></button><button></button></div>
             </div>
           </div>
         </div>
-        <div class="lingua-study-alignment-result">
-          <audio class="lingua-study-alignment-preview" controls></audio>
-          <div class="lingua-study-alignment-row"><div class="lingua-study-alignment-text">Aligned sentence</div><div class="lingua-study-alignment-timing"><input><input><span>匹配 90%</span><button></button></div></div>
+        <div class="listenband-alignment-result">
+          <audio class="listenband-alignment-preview" controls></audio>
+          <div class="listenband-alignment-row"><div class="listenband-alignment-text">Aligned sentence</div><div class="listenband-alignment-timing"><input><input><span>匹配 90%</span><button></button></div></div>
         </div>
       </div>
     </div>
@@ -184,7 +184,7 @@ try {
           check(dictionaryBody.scrollHeight > dictionaryBody.clientHeight, "长词典内容没有完整保留滚动范围");
           check(importModal.getBoundingClientRect().width <= Math.min(920, window.innerWidth - 40) + 1, "文稿向导宽度超出窗口");
           check(importModal.scrollWidth <= importModal.clientWidth + 1, "长文稿向导产生横向溢出");
-          check(importModal.querySelector(".lingua-study-alignment-preview").getBoundingClientRect().height >= 38, "对齐结果缺少试听控件");
+          check(importModal.querySelector(".listenband-alignment-preview").getBoundingClientRect().height >= 38, "对齐结果缺少试听控件");
           const activeTabStyle = getComputedStyle(dictionaryTabs[0]);
           const inactiveTabStyle = getComputedStyle(dictionaryTabs[1]);
           check(activeTabStyle.backgroundColor !== inactiveTabStyle.backgroundColor, "当前词典页面缺少明确的实心高亮");

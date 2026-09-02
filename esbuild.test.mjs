@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const testOutputDirectory = join(tmpdir(), "lingua-study-test-dist");
+const testOutputDirectory = join(tmpdir(), "listenband-test-dist");
 
 await rm(testOutputDirectory, { recursive: true, force: true });
 

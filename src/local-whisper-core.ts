@@ -44,19 +44,19 @@ export function getWhisperCacheFolder(
   environment: Readonly<Record<string, string | undefined>>
 ): string {
   if (platform === "darwin") {
-    return join(homeDirectory, "Library", "Caches", "Lingua Study", "Whisper Alignment");
+    return join(homeDirectory, "Library", "Caches", "ListenBand", "Whisper Alignment");
   }
   if (platform === "win32") {
     return join(
       environment.LOCALAPPDATA?.trim() || join(homeDirectory, "AppData", "Local"),
-      "Lingua Study",
+      "ListenBand",
       "Cache",
       "Whisper Alignment"
     );
   }
   return join(
     environment.XDG_CACHE_HOME?.trim() || join(homeDirectory, ".cache"),
-    "lingua-study",
+    "listenband",
     "whisper-alignment"
   );
 }

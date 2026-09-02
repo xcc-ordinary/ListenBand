@@ -246,14 +246,14 @@ test("生成 B站播放器代码块并识别已有视频", () => {
   const block = buildBilibiliStudyBlock(link);
   assert.equal(
     block,
-    "```lingua-study\nplatform: bilibili\nbvid: BV1B7411m7LV\npage: 2\n```"
+    "```listenband\nplatform: bilibili\nbvid: BV1B7411m7LV\npage: 2\n```"
   );
   assert.deepEqual(extractBilibiliVideosFromStudyBlocks(block), [
     { idType: "bvid", videoId: "BV1B7411m7LV", page: 2 }
   ]);
   assert.deepEqual(
     extractBilibiliVideosFromStudyBlocks(
-      "```lingua-study\nplatform: bilibili\naid: 123456\npage: 1\n```"
+      "```listenband\nplatform: bilibili\naid: 123456\npage: 1\n```"
     ),
     [{ idType: "aid", videoId: "av123456", page: 1 }]
   );
@@ -263,16 +263,16 @@ test("B站学习代码块可以安全加入字幕路径", () => {
   const link = parseBilibiliLink("https://www.bilibili.com/video/BV1B7411m7LV?p=2");
   assert.ok(link?.kind === "video");
   assert.equal(
-    buildBilibiliStudyBlock(link, "Lingua Study/Transcripts/BV1B7411m7LV-p2.json"),
-    "```lingua-study\nplatform: bilibili\nbvid: BV1B7411m7LV\npage: 2\ntranscript: Lingua Study/Transcripts/BV1B7411m7LV-p2.json\n```"
+    buildBilibiliStudyBlock(link, "ListenBand/Transcripts/BV1B7411m7LV-p2.json"),
+    "```listenband\nplatform: bilibili\nbvid: BV1B7411m7LV\npage: 2\ntranscript: ListenBand/Transcripts/BV1B7411m7LV-p2.json\n```"
   );
   assert.equal(
     addTranscriptToBilibiliStudyBlock(
       `before\n${buildBilibiliStudyBlock(link)}\nafter`,
       link,
-      "Lingua Study/Transcripts/BV1B7411m7LV-p2.json"
+      "ListenBand/Transcripts/BV1B7411m7LV-p2.json"
     ),
-    `before\n${buildBilibiliStudyBlock(link, "Lingua Study/Transcripts/BV1B7411m7LV-p2.json")}\nafter`
+    `before\n${buildBilibiliStudyBlock(link, "ListenBand/Transcripts/BV1B7411m7LV-p2.json")}\nafter`
   );
 });
 
@@ -437,28 +437,28 @@ test("B站字幕导入不再包含 Chrome Helper 通信路径", async () => {
 
 test("字幕文件夹、代码块与冲突文件名受到保护", () => {
   assert.equal(sanitizeTranscriptFolder(" /My Folder/Transcripts/ "), "My Folder/Transcripts");
-  assert.equal(sanitizeTranscriptFolder("../Secrets"), "Lingua Study/Transcripts");
+  assert.equal(sanitizeTranscriptFolder("../Secrets"), "ListenBand/Transcripts");
   assert.equal(
-    buildStudyBlock("Lingua Study/Transcripts/abcdefghijk.json"),
-    "```lingua-study\ntranscript: Lingua Study/Transcripts/abcdefghijk.json\n```"
+    buildStudyBlock("ListenBand/Transcripts/abcdefghijk.json"),
+    "```listenband\ntranscript: ListenBand/Transcripts/abcdefghijk.json\n```"
   );
   assert.deepEqual(
     extractTranscriptPathsFromStudyBlocks(
-      "```lingua-study\ntranscript: Lingua Study/Transcripts/abcdefghijk.json\n```"
+      "```listenband\ntranscript: ListenBand/Transcripts/abcdefghijk.json\n```"
     ),
-    ["Lingua Study/Transcripts/abcdefghijk.json"]
+    ["ListenBand/Transcripts/abcdefghijk.json"]
   );
   const occupied = new Set([
-    "Lingua Study/Transcripts/abcdefghijk.json",
-    "Lingua Study/Transcripts/abcdefghijk-2.json"
+    "ListenBand/Transcripts/abcdefghijk.json",
+    "ListenBand/Transcripts/abcdefghijk-2.json"
   ]);
   assert.deepEqual(
     chooseAvailableTranscriptPath(
-      "Lingua Study/Transcripts",
+      "ListenBand/Transcripts",
       VIDEO_ID,
       (path) => occupied.has(path)
     ),
-    { path: "Lingua Study/Transcripts/abcdefghijk-3.json", conflict: true }
+    { path: "ListenBand/Transcripts/abcdefghijk-3.json", conflict: true }
   );
 });
 

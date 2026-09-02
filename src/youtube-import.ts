@@ -34,7 +34,7 @@ import {
   type YouTubeImportErrorCode,
   type YouTubeLink
 } from "./import-core";
-import type { LinguaStudySettings } from "./settings";
+import type { ListenBandSettings } from "./settings";
 import { validateTranscript, type TranscriptFile, type TranscriptSegment } from "./transcript-core";
 import { fetchTranscriptWithYtDlp } from "./yt-dlp";
 import { addStudyBlockExitLine } from "./live-preview-core";
@@ -85,7 +85,7 @@ class YouTubeLinkModal extends Modal {
 
     for (const link of this.links) {
       const button = this.contentEl.createEl("button", {
-        cls: "mod-cta lingua-study-link-choice",
+        cls: "mod-cta listenband-link-choice",
         text: `${link.videoId} — ${link.originalUrl}`
       });
       button.addEventListener("click", () => this.finish(link));
@@ -95,9 +95,9 @@ class YouTubeLinkModal extends Modal {
       type: "url",
       placeholder: "https://www.youtube.com/watch?v=..."
     });
-    input.addClass("lingua-study-url-input");
-    const errorEl = this.contentEl.createDiv({ cls: "lingua-study-import-error" });
-    const actions = this.contentEl.createDiv({ cls: "lingua-study-import-actions" });
+    input.addClass("listenband-url-input");
+    const errorEl = this.contentEl.createDiv({ cls: "listenband-import-error" });
+    const actions = this.contentEl.createDiv({ cls: "listenband-import-actions" });
     const importButton = actions.createEl("button", { cls: "mod-cta", text: "导入" });
     actions.createEl("button", { text: "取消" }).addEventListener("click", () => this.finish(null));
 
@@ -154,11 +154,11 @@ class SubtitleFallbackModal extends Modal {
     this.contentEl.createEl("p", {
       text: "可改选本机 .srt 或 .vtt 文件继续。文件只在本机读取，不会上传，最大 10 MB。"
     });
-    const errorEl = this.contentEl.createDiv({ cls: "lingua-study-import-error" });
+    const errorEl = this.contentEl.createDiv({ cls: "listenband-import-error" });
     const fileInput = this.contentEl.createEl("input", { type: "file" });
     fileInput.accept = ".srt,.vtt,text/vtt,application/x-subrip";
-    fileInput.addClass("lingua-study-file-input");
-    const actions = this.contentEl.createDiv({ cls: "lingua-study-import-actions" });
+    fileInput.addClass("listenband-file-input");
+    const actions = this.contentEl.createDiv({ cls: "listenband-import-actions" });
     const chooseButton = actions.createEl("button", {
       cls: "mod-cta",
       text: "选择本地字幕文件（.srt / .vtt）"
@@ -220,7 +220,7 @@ export class YouTubeImportController {
 
   constructor(
     private readonly app: App,
-    private readonly getSettings: () => LinguaStudySettings
+    private readonly getSettings: () => ListenBandSettings
   ) {}
 
   async importFromEditor(editor: Editor, view: MarkdownView): Promise<void> {
@@ -496,7 +496,7 @@ export class YouTubeImportController {
     if (!track) {
       failures.push(new TranscriptImportError(
         "no-english-captions",
-        "这个视频有字幕，但没有英文字幕。Lingua Study 不会把其他语言静默翻译成英文。"
+        "这个视频有字幕，但没有英文字幕。ListenBand 不会把其他语言静默翻译成英文。"
       ));
       return null;
     }

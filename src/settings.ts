@@ -7,18 +7,18 @@ import {
   type Setting
 } from "obsidian";
 import type { SettingDefinitionItem, SettingDefinitionPage } from "obsidian";
-import type LinguaStudyPlugin from "./main";
+import type ListenBandPlugin from "./main";
 import { DEFAULT_TRANSCRIPT_FOLDER, sanitizeTranscriptFolder } from "./import-core";
 import {
   DEFAULT_SETTINGS,
-  type LinguaStudySettings
+  type ListenBandSettings
 } from "./settings-core";
 import { DICTIONARY_SOURCE } from "./dictionary-core";
 
 export {
   DEFAULT_SETTINGS,
   sanitizeSettings,
-  type LinguaStudySettings
+  type ListenBandSettings
 } from "./settings-core";
 
 class ClearWhisperAlignmentCacheModal extends Modal {
@@ -31,7 +31,7 @@ class ClearWhisperAlignmentCacheModal extends Modal {
     this.contentEl.createEl("p", {
       text: "这只会删除本地语音模型和运行文件，不会删除视频、字幕、翻译或笔记。下次使用本地自动对齐时需要重新下载。"
     });
-    const actions = this.contentEl.createDiv({ cls: "lingua-study-import-actions" });
+    const actions = this.contentEl.createDiv({ cls: "listenband-import-actions" });
     const confirm = actions.createEl("button", { cls: "mod-warning", text: "确认清除" });
     actions.createEl("button", { text: "取消" }).addEventListener("click", () => this.close());
     confirm.addEventListener("click", () => {
@@ -61,7 +61,7 @@ class ClearFullDictionaryModal extends Modal {
     this.contentEl.createEl("p", {
       text: "删除后会立即恢复使用内置精简版，不会删除生词本、复习记录、字幕或翻译内容。以后仍可重新下载。"
     });
-    const actions = this.contentEl.createDiv({ cls: "lingua-study-import-actions" });
+    const actions = this.contentEl.createDiv({ cls: "listenband-import-actions" });
     const confirm = actions.createEl("button", { cls: "mod-warning", text: "确认删除" });
     actions.createEl("button", { text: "取消" }).addEventListener("click", () => this.close());
     confirm.addEventListener("click", () => {
@@ -78,12 +78,12 @@ class ClearFullDictionaryModal extends Modal {
   }
 }
 
-export class LinguaStudySettingTab extends PluginSettingTab {
+export class ListenBandSettingTab extends PluginSettingTab {
   private readonly bilibiliStatusEls = new Set<HTMLElement>();
 
-  constructor(app: App, private readonly plugin: LinguaStudyPlugin) {
+  constructor(app: App, private readonly plugin: ListenBandPlugin) {
     super(app, plugin);
-    this.containerEl.addClass("lingua-study-settings");
+    this.containerEl.addClass("listenband-settings");
   }
 
   /** 顶层只保留六个原生子页面，子页面内容仍参与 Obsidian 设置搜索。 */
@@ -108,7 +108,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "字幕文件",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "字幕保存文件夹",
@@ -125,7 +125,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "获取方式",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "yt-dlp 程序路径（可选）",
@@ -157,7 +157,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "视频缓存",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "缓存位置",
@@ -186,7 +186,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "B站账号",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "插件内登录状态",
@@ -195,7 +195,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
             },
             {
               name: "管理插件内账号",
-              desc: "登录窗口由 Obsidian 桌面端打开。清除登录只退出 Lingua Study 的独立会话，不影响 Chrome 或其他浏览器。",
+              desc: "登录窗口由 Obsidian 桌面端打开。清除登录只退出 ListenBand 的独立会话，不影响 Chrome 或其他浏览器。",
               render: (setting) => {
                 setting.addButton((button) => {
                   button.setButtonText("在 Obsidian 内登录").onClick(async () => {
@@ -219,7 +219,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
                     button.setDisabled(true);
                     try {
                       await this.plugin.clearBilibiliLogin();
-                      new Notice("已清除 Lingua Study 的 B站登录会话。", 5_000);
+                      new Notice("已清除 ListenBand 的 B站登录会话。", 5_000);
                       await this.refreshBilibiliStatusIndicators();
                     } catch {
                       new Notice("B站登录会话清除失败，请重新加载插件后再试。", 6_000);
@@ -235,7 +235,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "使用说明",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "网络与空间限制",
@@ -257,7 +257,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "学习目标",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "当前备考范围",
@@ -269,7 +269,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "词典与复习",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "ECDICT 精简版",
@@ -280,7 +280,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
               desc: "点击下载后优先安装已生成的压缩词典包，不可用时自动回退到 ECDICT 官方 CSV；支持断点续传和自动重试。文件保存在系统缓存目录，不写入笔记库、不参与 Obsidian Sync。",
               render: (setting) => {
                 const status = setting.controlEl.createSpan({
-                  cls: "lingua-study-settings-status"
+                  cls: "listenband-settings-status"
                 });
                 status.setAttribute("role", "status");
                 status.setAttribute("aria-live", "polite");
@@ -372,14 +372,14 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "本地文稿对齐",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "Whisper Base English 模型",
               desc: `仅在用户手动上传文稿并选择自动对齐时使用。首次使用需确认下载；音视频不会上传。运行文件位于：${this.plugin.getWhisperAlignmentCacheFolder()}`,
               render: (setting) => {
                 const status = setting.controlEl.createSpan({
-                  cls: "lingua-study-settings-status",
+                  cls: "listenband-settings-status",
                   text: "正在检查模型…"
                 });
                 status.setAttribute("role", "status");
@@ -418,7 +418,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "使用范围",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "与 B站字幕获取相互独立",
@@ -440,7 +440,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "服务选择",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "翻译服务",
@@ -471,7 +471,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "Kimi 官方（国内）",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           visible: () => this.plugin.settings.translationProvider === "kimi",
           items: [
             {
@@ -511,7 +511,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "DeepSeek 官方",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           visible: () => this.plugin.settings.translationProvider === "deepseek",
           items: [
             {
@@ -552,7 +552,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "OpenAI 兼容中转站",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           visible: () => this.plugin.settings.translationProvider === "openai-compatible",
           items: [
             {
@@ -589,11 +589,11 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "连接与隐私",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "测试连接",
-              desc: "发送固定短句 “Thank you for using Lingua Study.”，不会读取当前笔记。",
+              desc: "发送固定短句 “Thank you for using ListenBand.”，不会读取当前笔记。",
               visible: () => this.plugin.settings.translationProvider !== "disabled",
               render: (setting) => {
                 setting.addButton((button) => {
@@ -632,11 +632,11 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "自动化",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "粘贴视频链接后自动创建学习内容（可选）",
-              desc: "默认关闭：粘贴链接后点击左侧 Lingua Study Logo 手动创建。开启后，粘贴单个完整的 B站或 YouTube 视频链接会立即开始导入；普通文字中的链接和一次粘贴多个链接不会触发。",
+              desc: "默认关闭：粘贴链接后点击左侧 ListenBand Logo 手动创建。开启后，粘贴单个完整的 B站或 YouTube 视频链接会立即开始导入；普通文字中的链接和一次粘贴多个链接不会触发。",
               control: {
                 type: "toggle",
                 key: "autoImportPastedVideoLinks",
@@ -648,7 +648,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
         {
           type: "group",
           heading: "本地缓存",
-          cls: "lingua-study-settings-section",
+          cls: "listenband-settings-section",
           items: [
             {
               name: "保存翻译缓存",
@@ -667,7 +667,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
 
   private renderBilibiliStatus(setting: Setting): () => void {
     const statusEl = setting.controlEl.createSpan({
-      cls: "lingua-study-settings-status",
+      cls: "listenband-settings-status",
       text: "正在检查…"
     });
     statusEl.setAttribute("role", "status");
@@ -723,7 +723,7 @@ export class LinguaStudySettingTab extends PluginSettingTab {
   /** 明确读取插件自己的设置，避免把值误写到 Obsidian 的全局配置。 */
   getControlValue(key: string): unknown {
     if (key in this.plugin.settings) {
-      return this.plugin.settings[key as keyof LinguaStudySettings];
+      return this.plugin.settings[key as keyof ListenBandSettings];
     }
     return undefined;
   }

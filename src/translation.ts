@@ -1,5 +1,5 @@
 import { App, requestUrl } from "obsidian";
-import type { LinguaStudySettings } from "./settings";
+import type { ListenBandSettings } from "./settings";
 import {
   buildTranslationRequestBody,
   parseTranslationResponse,
@@ -42,7 +42,7 @@ export interface StudyAnalysisResult {
 export class TranslationService {
   constructor(
     private readonly app: App,
-    private readonly getSettings: () => LinguaStudySettings
+    private readonly getSettings: () => ListenBandSettings
   ) {}
 
   async translate(sourceText: string): Promise<TranslationResult> {

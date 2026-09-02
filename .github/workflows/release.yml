@@ -58,5 +58,5 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             main.js manifest.json styles.css \
             --verify-tag \
-            --title "Lingua Study $GITHUB_REF_NAME" \
+            --title "ListenBand $GITHUB_REF_NAME" \
             --generate-notes

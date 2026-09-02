@@ -19,11 +19,11 @@ import {
 test("完整版词典缓存目录位于系统缓存而不是笔记库", () => {
   assert.equal(
     getFullDictionaryCacheFolder("darwin", "/Users/tester", {}),
-    "/Users/tester/Library/Caches/Lingua Study/Dictionary"
+    join("/Users/tester", "Library", "Caches", "ListenBand", "Dictionary")
   );
   assert.equal(
     getFullDictionaryCacheFolder("win32", "C:\\Users\\tester", { LOCALAPPDATA: "D:\\Cache" }),
-    "D:\\Cache/Lingua Study/Cache/Dictionary"
+    join("D:\\Cache", "ListenBand", "Cache", "Dictionary")
   );
 });
 

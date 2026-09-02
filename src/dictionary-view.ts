@@ -17,9 +17,9 @@ import {
   type VocabularyContext,
   type VocabularyEntry
 } from "./vocabulary-core";
-import type LinguaStudyPlugin from "./main";
+import type ListenBandPlugin from "./main";
 
-export const DICTIONARY_VIEW_TYPE = "lingua-study-dictionary";
+export const DICTIONARY_VIEW_TYPE = "listenband-dictionary";
 
 export interface DictionaryLookupContext {
   word: string;
@@ -37,7 +37,7 @@ type VocabularyFilter = "all" | StudyProfile | "due" | "new";
 
 class VocabularyTextModal extends Modal {
   constructor(
-    app: LinguaStudyPlugin["app"],
+    app: ListenBandPlugin["app"],
     private readonly title: string,
     private readonly description: string,
     private readonly initialValue: string,
@@ -85,7 +85,7 @@ class VocabularyTextModal extends Modal {
 
 class VocabularyDeleteModal extends Modal {
   constructor(
-    app: LinguaStudyPlugin["app"],
+    app: ListenBandPlugin["app"],
     private readonly word: string,
     private readonly onConfirm: () => Promise<void>
   ) {
@@ -136,7 +136,7 @@ export class LinguaDictionaryView extends ItemView {
 
   constructor(
     leaf: WorkspaceLeaf,
-    private readonly plugin: LinguaStudyPlugin
+    private readonly plugin: ListenBandPlugin
   ) {
     super(leaf);
   }
