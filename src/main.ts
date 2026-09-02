@@ -442,6 +442,10 @@ class ListenBandRenderChild extends MarkdownRenderChild {
   private intensiveRevealButton: HTMLButtonElement | null = null;
   private intensiveSentenceRevealed = false;
   private intensiveDictationDraft = "";
+  private readonly intensiveSentenceStates = new Map<number, {
+    draft: string;
+    revealed: boolean;
+  }>();
   private intensiveDictationInput: HTMLTextAreaElement | null = null;
   private intensiveComparisonEl: HTMLElement | null = null;
   private intensivePositionEl: HTMLElement | null = null;
@@ -507,6 +511,33 @@ class ListenBandRenderChild extends MarkdownRenderChild {
   private lookupHighlightEl: HTMLElement | null = null;
   private vocabularyTargetRowEl: HTMLElement | null = null;
   private vocabularyNavigationIndex: number | null = null;
+  private readonly intensiveKeydownHandler = (event: KeyboardEvent): void => {
+    if (
+      this.destroyed
+      || this.listeningMode !== "intensive"
+      || event.defaultPrevented
+      || event.repeat
+      || event.altKey
+      || event.ctrlKey
+      || event.metaKey
+      || event.shiftKey
+    ) {
+      return;
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      this.toggleIntensiveSentenceReveal();
+    } else if (event.key === "ArrowDown") {
+      event.preventDefault();
+      this.playIntensiveSegment(this.intensiveSegmentIndex);
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      this.playIntensiveSegment(this.intensiveSegmentIndex - 1);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      this.playIntensiveSegment(this.intensiveSegmentIndex + 1);
+    }
+  };
 
   constructor(
     containerEl: HTMLElement,
@@ -522,12 +553,14 @@ class ListenBandRenderChild extends MarkdownRenderChild {
 
   onload(): void {
     this.plugin.registerStudyRenderer(this);
+    window.addEventListener("keydown", this.intensiveKeydownHandler);
     this.renderLoadingShell();
     void this.initialize();
   }
 
   onunload(): void {
     this.destroyed = true;
+    window.removeEventListener("keydown", this.intensiveKeydownHandler);
     this.plugin.unregisterStudyRenderer(this);
     this.localSeekGeneration += 1;
     this.fullWidthObserver?.disconnect();
@@ -591,6 +624,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     this.intensiveRevealButton = null;
     this.intensiveSentenceRevealed = false;
     this.intensiveDictationDraft = "";
+    this.intensiveSentenceStates.clear();
     this.intensiveDictationInput = null;
     this.intensiveComparisonEl = null;
     this.intensivePositionEl = null;
@@ -1426,14 +1460,12 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     const actions = focus.createDiv({ cls: "evs-intensive-focus-actions" });
     const reveal = actions.createEl("button", {
       cls: "evs-button evs-intensive-reveal",
-      text: "显示原文"
+      text: "显示原文 ↑"
     });
     reveal.type = "button";
     reveal.setAttribute("aria-pressed", "false");
-    reveal.addEventListener("click", () => {
-      this.intensiveSentenceRevealed = !this.intensiveSentenceRevealed;
-      this.updateIntensiveListeningPanel();
-    });
+    reveal.setAttribute("aria-keyshortcuts", "ArrowUp");
+    reveal.addEventListener("click", () => this.toggleIntensiveSentenceReveal());
     this.intensiveRevealButton = reveal;
 
     const dictation = focus.createDiv({ cls: "evs-intensive-dictation" });
@@ -1449,6 +1481,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     input.setAttribute("aria-label", dictationLabel.textContent ?? "你的默写");
     input.addEventListener("input", () => {
       this.intensiveDictationDraft = input.value;
+      this.saveIntensiveSentenceState();
       this.updateIntensiveComparison();
     });
     this.intensiveDictationInput = input;
@@ -1458,20 +1491,23 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     const controls = panel.createDiv({ cls: "evs-intensive-controls" });
     this.intensivePreviousButton = this.createIntensiveButton(
       controls,
-      "上一句",
+      "← 上一句",
       () => this.playIntensiveSegment(this.intensiveSegmentIndex - 1)
     );
-    this.createIntensiveButton(
+    this.intensivePreviousButton.setAttribute("aria-keyshortcuts", "ArrowLeft");
+    const repeat = this.createIntensiveButton(
       controls,
-      "重复",
+      "重复 ↓",
       () => this.playIntensiveSegment(this.intensiveSegmentIndex),
       "is-repeat"
     );
+    repeat.setAttribute("aria-keyshortcuts", "ArrowDown");
     this.intensiveNextButton = this.createIntensiveButton(
       controls,
-      "下一句",
+      "下一句 →",
       () => this.playIntensiveSegment(this.intensiveSegmentIndex + 1)
     );
+    this.intensiveNextButton.setAttribute("aria-keyshortcuts", "ArrowRight");
     this.intensivePanelEl = panel;
     this.updateIntensiveListeningPanel();
   }
@@ -1507,8 +1543,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
         : Math.max(0, this.segmentActionTargetIndex);
       this.intensiveSegmentIndex = selected;
       this.intensiveStopArmed = false;
-      this.intensiveSentenceRevealed = false;
-      this.intensiveDictationDraft = "";
+      this.restoreIntensiveSentenceState(selected);
       if (this.localVideoEl && !this.localVideoEl.paused) {
         this.localVideoEl.pause();
       } else if (this.iframeEl && this.playerState === PLAYER_STATE_PLAYING) {
@@ -1516,6 +1551,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       }
       this.updateIntensiveListeningPanel();
     } else {
+      this.saveIntensiveSentenceState();
       this.intensiveStopArmed = false;
       this.selectSegmentForActions(this.intensiveSegmentIndex, false);
       this.centerSegment(this.intensiveSegmentIndex);
@@ -1539,7 +1575,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     );
     if (this.intensiveRevealButton) {
       this.intensiveRevealButton.setText(
-        this.intensiveSentenceRevealed ? "隐藏原文" : "显示原文"
+        this.intensiveSentenceRevealed ? "隐藏原文 ↑" : "显示原文 ↑"
       );
       this.intensiveRevealButton.setAttribute(
         "aria-pressed",
@@ -1567,14 +1603,33 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       return;
     }
     const changingSentence = index !== this.intensiveSegmentIndex;
+    this.saveIntensiveSentenceState();
     this.intensiveSegmentIndex = index;
     this.intensiveStopArmed = true;
-    this.intensiveSentenceRevealed = false;
     if (changingSentence) {
-      this.intensiveDictationDraft = "";
+      this.restoreIntensiveSentenceState(index);
     }
     this.updateIntensiveListeningPanel();
     this.jumpTo(segments[index].start);
+  }
+
+  private toggleIntensiveSentenceReveal(): void {
+    this.intensiveSentenceRevealed = !this.intensiveSentenceRevealed;
+    this.saveIntensiveSentenceState();
+    this.updateIntensiveListeningPanel();
+  }
+
+  private saveIntensiveSentenceState(): void {
+    this.intensiveSentenceStates.set(this.intensiveSegmentIndex, {
+      draft: this.intensiveDictationDraft,
+      revealed: this.intensiveSentenceRevealed
+    });
+  }
+
+  private restoreIntensiveSentenceState(index: number): void {
+    const state = this.intensiveSentenceStates.get(index);
+    this.intensiveDictationDraft = state?.draft ?? "";
+    this.intensiveSentenceRevealed = state?.revealed ?? false;
   }
 
   private updateIntensiveComparison(): void {

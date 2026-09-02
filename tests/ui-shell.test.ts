@@ -338,6 +338,15 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.doesNotMatch(mainSource, /开始默写/u);
   assert.match(mainSource, /你的默写/u);
   assert.match(mainSource, /显示原文/u);
+  assert.match(mainSource, /intensiveSentenceStates = new Map/u);
+  assert.match(mainSource, /saveIntensiveSentenceState/u);
+  assert.match(mainSource, /restoreIntensiveSentenceState/u);
+  assert.match(mainSource, /event\.key === "ArrowUp"/u);
+  assert.match(mainSource, /event\.key === "ArrowDown"/u);
+  assert.match(mainSource, /event\.key === "ArrowLeft"/u);
+  assert.match(mainSource, /event\.key === "ArrowRight"/u);
+  assert.match(mainSource, /event\.preventDefault\(\)/u);
+  assert.match(mainSource, /aria-keyshortcuts/u);
   assert.match(mainSource, /normalizeDictationText/u);
   assert.match(css, /\.evs-intensive-dictation \{/u);
   assert.match(css, /\.evs-intensive-dictation-input \{/u);
@@ -355,7 +364,8 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(css, /\.lingua-review-context-actions/u);
   assert.match(css, /\.lingua-vocabulary-list-item \{[\s\S]*?height: auto !important;[\s\S]*?min-height: 72px;/u);
   assert.match(css, /\.lingua-review-ratings button \{[\s\S]*?height: auto !important;[\s\S]*?min-height: 48px;/u);
-  assert.match(css, /\.lingua-dictionary-view button:not\(:disabled\):hover[\s\S]*?background: var\(--interactive-accent\) !important;/u);
+  assert.match(css, /--listenband-surface:/u);
+  assert.match(css, /prefers-reduced-transparency: reduce/u);
   assert.match(css, /\.lingua-dictionary-profile select:hover[\s\S]*?background-color: var\(--interactive-accent\) !important;/u);
   assert.match(css, /\.lingua-vocabulary-controls select:hover/u);
   assert.match(css, /\.lingua-dictionary-profile select:focus-visible/u);

@@ -2173,8 +2173,80 @@
   }
 }
 
+/* ListenBand 的统一界面材质：安静的层级、系统字体和轻量景深。 */
+:is(
+  .evs-root,
+  .lingua-dictionary-view,
+  .listenband-settings,
+  .setting-page:has(.listenband-settings-section),
+  .listenband-document-import-modal,
+  .lingua-vocabulary-modal-actions
+) {
+  --listenband-radius-control: 10px;
+  --listenband-radius-card: 14px;
+  --listenband-surface: color-mix(in srgb, var(--background-primary) 88%, transparent);
+  --listenband-surface-raised: color-mix(in srgb, var(--background-secondary) 82%, transparent);
+  --listenband-border: color-mix(in srgb, var(--background-modifier-border) 78%, transparent);
+  --listenband-shadow-card: 0 1px 2px rgb(0 0 0 / 6%), 0 10px 30px rgb(0 0 0 / 8%);
+  font-family: var(--font-interface);
+  font-optical-sizing: auto;
+}
+
+.evs-root {
+  border-color: var(--listenband-border);
+  border-radius: 16px;
+  background: var(--listenband-surface);
+  box-shadow: var(--listenband-shadow-card);
+}
+
+.evs-player-dock {
+  border-color: var(--listenband-border);
+  border-radius: var(--listenband-radius-card);
+  box-shadow: var(--listenband-shadow-card);
+}
+
+.evs-toolbar {
+  border-color: var(--listenband-border);
+  background: color-mix(in srgb, var(--background-secondary) 72%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+}
+
+:is(.evs-button, .evs-timestamp, .lingua-dictionary-view button, .listenband-document-import-modal button) {
+  border-color: var(--listenband-border);
+  border-radius: var(--listenband-radius-control);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%), 0 1px 2px rgb(0 0 0 / 7%);
+}
+
+:is(
+  .evs-segment,
+  .evs-translation-text,
+  .lingua-vocabulary-list-item,
+  .lingua-review-card,
+  .lingua-review-summary,
+  .lingua-dictionary-empty,
+  .lingua-dictionary-missing,
+  .listenband-settings .setting-item:has(.setting-item-chevron)
+) {
+  border-radius: var(--listenband-radius-card);
+}
+
+:is(
+  .evs-intensive-dictation-input,
+  .lingua-dictionary-search input,
+  .lingua-vocabulary-controls input,
+  .lingua-vocabulary-note-editor,
+  .listenband-document-import-modal input,
+  .listenband-document-import-modal textarea,
+  .listenband-document-import-modal select
+) {
+  border-color: var(--listenband-border);
+  border-radius: var(--listenband-radius-control);
+  background: var(--listenband-surface-raised);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 5%);
+}
+
 /*
- * 所有 ListenBand 自定义按钮使用同一套可点击反馈。
+ * 所有 ListenBand 自定义按钮使用同一套即时、克制的点击反馈。
  * 原生 video、YouTube 与 B站 iframe 内部控件由浏览器管理，不在此范围内。
  */
 .evs-root button:not(:disabled),
@@ -2200,10 +2272,10 @@
 .listenband-import-actions button:not(:disabled):hover,
 .lingua-vocabulary-modal-actions button:not(:disabled):hover,
 .listenband-link-choice:not(:disabled):hover {
-  border-color: var(--interactive-accent) !important;
-  background: var(--interactive-accent) !important;
-  color: var(--text-on-accent) !important;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 18%);
+  border-color: var(--background-modifier-border-hover) !important;
+  background: var(--interactive-hover) !important;
+  color: var(--text-normal) !important;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 }
 
 .lingua-dictionary-view button:not(:disabled):hover span,
@@ -2218,8 +2290,25 @@
 .listenband-import-actions button:not(:disabled):active,
 .lingua-vocabulary-modal-actions button:not(:disabled):active,
 .listenband-link-choice:not(:disabled):active {
-  transform: translateY(1px);
-  box-shadow: none;
+  transform: scale(0.97);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 7%);
+}
+
+:is(
+  .evs-play-button,
+  .evs-intensive-button.is-repeat,
+  .lingua-dictionary-tabs button.is-active,
+  .lingua-dictionary-icon-button.is-saved
+):not(:disabled),
+:is(
+  .evs-play-button,
+  .evs-intensive-button.is-repeat,
+  .lingua-dictionary-tabs button.is-active,
+  .lingua-dictionary-icon-button.is-saved
+):not(:disabled):hover {
+  border-color: var(--interactive-accent) !important;
+  background: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
 }
 
 .evs-root button:focus-visible,
@@ -2229,8 +2318,17 @@
 .listenband-import-actions button:focus-visible,
 .lingua-vocabulary-modal-actions button:focus-visible,
 .listenband-link-choice:focus-visible {
-  outline: 2px solid var(--interactive-accent);
+  outline: 3px solid color-mix(in srgb, var(--interactive-accent) 42%, transparent);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .evs-root,
+  .evs-toolbar,
+  .evs-intensive-reveal {
+    background: var(--background-primary);
+    backdrop-filter: none;
+  }
 }
 
 .evs-speed-group:hover:not(:has(.evs-speed-slider:disabled)) {
