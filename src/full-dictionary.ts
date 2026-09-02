@@ -250,10 +250,16 @@ async function downloadAttempt(
       const output = createWriteStream(targetPath, { flags: statusCode === 206 ? "a" : "w" });
       const startedAt = Date.now();
       let attemptBytes = 0;
+      let transferError: Error | null = null;
       const fail = (error: Error): void => {
+        if (transferError || settled) return;
+        transferError = error;
+        response.unpipe(output);
         response.destroy();
-        output.destroy();
-        finish(error);
+        // Keep bytes already accepted by the file stream. Destroying the stream
+        // here can discard its buffered writes, causing the next attempt to
+        // restart at byte zero instead of sending a Range request.
+        output.end();
       };
       response.setTimeout(DOWNLOAD_IDLE_TIMEOUT_MS, () => fail(new Error("词典下载超时，已保留当前进度。")));
       response.on("data", (chunk: Buffer) => {
@@ -267,8 +273,11 @@ async function downloadAttempt(
         onProgress({ received, total, bytesPerSecond: attemptBytes / elapsedSeconds });
       });
       response.once("error", fail);
-      output.once("error", fail);
-      output.once("finish", () => finish());
+      output.once("error", (error) => {
+        response.destroy();
+        finish(error);
+      });
+      output.once("finish", () => finish(transferError ?? undefined));
       response.pipe(output);
     });
     request.setTimeout(DOWNLOAD_IDLE_TIMEOUT_MS, () => request.destroy(new Error("连接词典下载服务器超时，已保留当前进度。")));
