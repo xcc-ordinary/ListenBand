@@ -24,7 +24,7 @@
     "check:release": "node scripts/check-release.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
