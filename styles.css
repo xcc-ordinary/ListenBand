@@ -580,7 +580,8 @@
   letter-spacing: -0.01em;
 }
 
-.evs-intensive-reveal {
+.evs-intensive-reveal,
+.evs-intensive-translate {
   min-width: 120px;
   min-height: 42px;
   border-color: color-mix(in srgb, var(--background-modifier-border) 72%, transparent);
@@ -594,6 +595,7 @@
 }
 
 .evs-intensive-reveal:active:not(:disabled),
+.evs-intensive-translate:active:not(:disabled),
 .evs-intensive-button:active:not(:disabled),
 .evs-intensive-header .evs-listening-mode-toggle:active:not(:disabled) {
   transform: scale(0.97);
@@ -706,8 +708,24 @@
   }
 }
 
+.evs-intensive-translation {
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--interactive-accent) 22%, var(--background-modifier-border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--interactive-accent) 7%, var(--background-secondary));
+  color: var(--text-normal);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.evs-intensive-translation.is-error {
+  border-color: color-mix(in srgb, var(--text-error) 38%, var(--background-modifier-border));
+  color: var(--text-error);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .evs-intensive-reveal,
+  .evs-intensive-translate,
   .evs-intensive-button,
   .evs-intensive-header .evs-listening-mode-toggle {
     transition: none;

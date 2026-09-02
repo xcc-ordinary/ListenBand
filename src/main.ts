@@ -440,6 +440,8 @@ class ListenBandRenderChild extends MarkdownRenderChild {
   private intensivePanelEl: HTMLElement | null = null;
   private intensiveSentenceEl: HTMLElement | null = null;
   private intensiveRevealButton: HTMLButtonElement | null = null;
+  private intensiveTranslateButton: HTMLButtonElement | null = null;
+  private intensiveTranslationEl: HTMLElement | null = null;
   private intensiveSentenceRevealed = false;
   private intensiveDictationDraft = "";
   private readonly intensiveSentenceStates = new Map<number, {
@@ -622,6 +624,8 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     this.intensivePanelEl = null;
     this.intensiveSentenceEl = null;
     this.intensiveRevealButton = null;
+    this.intensiveTranslateButton = null;
+    this.intensiveTranslationEl = null;
     this.intensiveSentenceRevealed = false;
     this.intensiveDictationDraft = "";
     this.intensiveSentenceStates.clear();
@@ -1467,6 +1471,13 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     reveal.setAttribute("aria-keyshortcuts", "ArrowUp");
     reveal.addEventListener("click", () => this.toggleIntensiveSentenceReveal());
     this.intensiveRevealButton = reveal;
+    const translate = actions.createEl("button", {
+      cls: "evs-button evs-intensive-translate",
+      text: "翻译"
+    });
+    translate.type = "button";
+    translate.addEventListener("click", () => this.handleIntensiveTranslationAction());
+    this.intensiveTranslateButton = translate;
 
     const dictation = focus.createDiv({ cls: "evs-intensive-dictation" });
     const dictationLabel = dictation.createDiv({
@@ -1488,6 +1499,12 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     this.intensiveComparisonEl = dictation.createDiv({
       cls: "evs-intensive-comparison"
     });
+    this.intensiveTranslationEl = dictation.createDiv({
+      cls: "evs-intensive-translation"
+    });
+    this.intensiveTranslationEl.setAttribute("lang", "zh-CN");
+    this.intensiveTranslationEl.setAttribute("role", "status");
+    this.intensiveTranslationEl.hide();
     const controls = panel.createDiv({ cls: "evs-intensive-controls" });
     this.intensivePreviousButton = this.createIntensiveButton(
       controls,
@@ -1564,11 +1581,19 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     if (!segments || !segment) {
       return;
     }
-    this.intensiveSentenceEl?.setText(
-      this.intensiveSentenceRevealed
-        ? segment.text
-        : "原文已隐藏，请在下方默写这一句"
-    );
+    if (this.intensiveSentenceEl) {
+      if (this.intensiveSentenceRevealed) {
+        this.intensiveSentenceEl.setAttribute("title", "双击单词在右侧词典中查询");
+        this.renderDictionaryText(
+          this.intensiveSentenceEl,
+          segment.text,
+          this.intensiveSegmentIndex
+        );
+      } else {
+        this.intensiveSentenceEl.removeAttribute("title");
+        this.intensiveSentenceEl.setText("原文已隐藏，请在下方默写这一句");
+      }
+    }
     this.intensiveSentenceEl?.classList.toggle(
       "is-concealed",
       !this.intensiveSentenceRevealed
@@ -1602,6 +1627,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     if (!segments || index < 0 || index >= segments.length) {
       return;
     }
+    this.updateIntensiveTranslation();
     const changingSentence = index !== this.intensiveSegmentIndex;
     this.saveIntensiveSentenceState();
     this.intensiveSegmentIndex = index;
@@ -1617,6 +1643,59 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     this.intensiveSentenceRevealed = !this.intensiveSentenceRevealed;
     this.saveIntensiveSentenceState();
     this.updateIntensiveListeningPanel();
+  }
+
+  private handleIntensiveTranslationAction(): void {
+    const view = this.translationViews[this.intensiveSegmentIndex];
+    if (!view || view.loading || this.destroyed) {
+      return;
+    }
+    if (this.hasTranslationOutput(view)) {
+      view.visible = !view.visible;
+      view.errorMessage = null;
+      view.statusTone = null;
+      this.updateTranslationView(view);
+      return;
+    }
+    void this.requestTranslation(this.intensiveSegmentIndex, "translate");
+  }
+
+  private updateIntensiveTranslation(): void {
+    const button = this.intensiveTranslateButton;
+    const output = this.intensiveTranslationEl;
+    const view = this.translationViews[this.intensiveSegmentIndex];
+    if (!button || !output || !view) {
+      return;
+    }
+    const translation = view.entry?.text
+      ?? view.studyEntries[IELTS_STUDY_PROFILE]?.analysis.translation
+      ?? "";
+    button.disabled = view.loading || this.translationBatchRunning;
+    button.setText(
+      view.loading
+        ? "翻译中…"
+        : translation
+          ? view.visible ? "隐藏翻译" : "显示翻译"
+          : view.errorMessage ? "重试翻译" : "翻译"
+    );
+    button.setAttribute("aria-expanded", (Boolean(translation) && view.visible).toString());
+    if (view.errorMessage) {
+      output.setText(view.errorMessage);
+      output.classList.add("is-error");
+      output.show();
+    } else if (view.loading) {
+      output.setText("正在生成当前句的译文与知识点……");
+      output.classList.remove("is-error");
+      output.show();
+    } else if (translation && view.visible) {
+      output.setText(translation);
+      output.classList.remove("is-error");
+      output.show();
+    } else {
+      output.empty();
+      output.classList.remove("is-error");
+      output.hide();
+    }
   }
 
   private saveIntensiveSentenceState(): void {
@@ -1901,6 +1980,9 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       view.statusEl.classList.remove("is-error");
       view.statusEl.classList.remove("is-warning");
       view.statusEl.hide();
+    }
+    if (view === this.translationViews[this.intensiveSegmentIndex]) {
+      this.updateIntensiveTranslation();
     }
     this.scheduleTranscriptLayout(true);
   }

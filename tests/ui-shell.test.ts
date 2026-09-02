@@ -347,10 +347,15 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(mainSource, /event\.key === "ArrowRight"/u);
   assert.match(mainSource, /event\.preventDefault\(\)/u);
   assert.match(mainSource, /aria-keyshortcuts/u);
+  assert.match(mainSource, /handleIntensiveTranslationAction/u);
+  assert.match(mainSource, /updateIntensiveTranslation/u);
+  assert.match(mainSource, /双击单词在右侧词典中查询/u);
+  assert.match(mainSource, /renderDictionaryText\(\s*this\.intensiveSentenceEl/u);
   assert.match(mainSource, /normalizeDictationText/u);
   assert.match(css, /\.evs-intensive-dictation \{/u);
   assert.match(css, /\.evs-intensive-dictation-input \{/u);
   assert.match(css, /\.evs-intensive-comparison \{/u);
+  assert.match(css, /\.evs-intensive-translation \{/u);
   assert.match(css, /font-size: clamp\(25px, 3\.5vw, 48px\);/u);
   assert.match(css, /\.evs-intensive-button:active:not\(:disabled\)/u);
   assert.doesNotMatch(css, /\.evs-transcript-tools/u);
