@@ -349,6 +349,22 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(mainSource, /aria-keyshortcuts/u);
   assert.match(mainSource, /handleIntensiveTranslationAction/u);
   assert.match(mainSource, /updateIntensiveTranslation/u);
+  assert.match(
+    mainSource,
+    /private updateIntensiveListeningPanel\(\)[\s\S]*?this\.updateIntensiveTranslation\(\);[\s\S]*?private playIntensiveSegment/u
+  );
+  assert.doesNotMatch(
+    mainSource,
+    /private playIntensiveSegment\(index: number\)[\s\S]*?this\.updateIntensiveTranslation\(\);[\s\S]*?this\.intensiveSegmentIndex = index/u
+  );
+  for (const commandId of [
+    "intensive-previous-sentence",
+    "intensive-next-sentence",
+    "intensive-repeat-sentence",
+    "intensive-toggle-original"
+  ]) {
+    assert.match(mainSource, new RegExp(`"${commandId}"`, "u"));
+  }
   assert.match(mainSource, /双击单词在右侧词典中查询/u);
   assert.match(mainSource, /renderDictionaryText\(\s*this\.intensiveSentenceEl/u);
   assert.match(mainSource, /normalizeDictationText/u);

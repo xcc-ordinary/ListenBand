@@ -118,6 +118,7 @@ interface BilibiliCodeBlockConfig {
 }
 
 type CodeBlockConfig = TranscriptCodeBlockConfig | BilibiliCodeBlockConfig;
+type IntensiveListeningCommand = "previous" | "next" | "repeat" | "toggle-original";
 
 interface YouTubeMessagePayload {
   id?: string | number;
@@ -1620,6 +1621,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     if (this.intensiveNextButton) {
       this.intensiveNextButton.disabled = this.intensiveSegmentIndex >= segments.length - 1;
     }
+    this.updateIntensiveTranslation();
   }
 
   private playIntensiveSegment(index: number): void {
@@ -1627,7 +1629,6 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     if (!segments || index < 0 || index >= segments.length) {
       return;
     }
-    this.updateIntensiveTranslation();
     const changingSentence = index !== this.intensiveSegmentIndex;
     this.saveIntensiveSentenceState();
     this.intensiveSegmentIndex = index;
@@ -1709,6 +1710,28 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     const state = this.intensiveSentenceStates.get(index);
     this.intensiveDictationDraft = state?.draft ?? "";
     this.intensiveSentenceRevealed = state?.revealed ?? false;
+  }
+
+  isIntensiveCommandTarget(): boolean {
+    return !this.destroyed
+      && this.listeningMode === "intensive"
+      && this.containerEl.isConnected
+      && this.containerEl.getClientRects().length > 0;
+  }
+
+  runIntensiveCommand(command: IntensiveListeningCommand): void {
+    if (!this.isIntensiveCommandTarget()) {
+      return;
+    }
+    if (command === "previous") {
+      this.playIntensiveSegment(this.intensiveSegmentIndex - 1);
+    } else if (command === "next") {
+      this.playIntensiveSegment(this.intensiveSegmentIndex + 1);
+    } else if (command === "repeat") {
+      this.playIntensiveSegment(this.intensiveSegmentIndex);
+    } else {
+      this.toggleIntensiveSentenceReveal();
+    }
   }
 
   private updateIntensiveComparison(): void {
@@ -3441,6 +3464,27 @@ export default class ListenBandPlugin extends Plugin {
     this.manualImportRibbonEl.setAttribute("aria-label", "ListenBand");
     this.addSettingTab(new ListenBandSettingTab(this.app, this));
 
+    this.registerIntensiveListeningCommand(
+      "intensive-previous-sentence",
+      "单句精听：上一句",
+      "previous"
+    );
+    this.registerIntensiveListeningCommand(
+      "intensive-next-sentence",
+      "单句精听：下一句",
+      "next"
+    );
+    this.registerIntensiveListeningCommand(
+      "intensive-repeat-sentence",
+      "单句精听：重复当前句",
+      "repeat"
+    );
+    this.registerIntensiveListeningCommand(
+      "intensive-toggle-original",
+      "单句精听：显示或隐藏原文",
+      "toggle-original"
+    );
+
     this.addCommand({
       id: "open-offline-dictionary",
       name: "打开离线词典",
@@ -3945,6 +3989,37 @@ export default class ListenBandPlugin extends Plugin {
     this.studyRendererReadyCounter += 1;
     this.studyRendererReadyOrder.set(renderer, this.studyRendererReadyCounter);
     void this.tryResolveVocabularyJump();
+  }
+
+  private registerIntensiveListeningCommand(
+    id: string,
+    name: string,
+    command: IntensiveListeningCommand
+  ): void {
+    this.addCommand({
+      id,
+      name,
+      checkCallback: (checking) => {
+        const renderer = this.getActiveIntensiveRenderer();
+        if (!renderer) {
+          return false;
+        }
+        if (!checking) {
+          renderer.runIntensiveCommand(command);
+        }
+        return true;
+      }
+    });
+  }
+
+  private getActiveIntensiveRenderer(): ListenBandRenderChild | null {
+    return selectNewestEligibleRenderer(
+      [...this.studyRenderers].map((renderer) => ({
+        renderer,
+        readyOrder: this.studyRendererReadyOrder.get(renderer) ?? 0,
+        eligible: renderer.isIntensiveCommandTarget()
+      }))
+    );
   }
 
   async loadVocabularyBook(): Promise<VocabularyBookLoadResult> {
