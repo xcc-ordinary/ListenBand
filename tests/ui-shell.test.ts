@@ -357,6 +357,7 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(css, /\.evs-intensive-comparison \{/u);
   assert.match(css, /\.evs-intensive-translation \{/u);
   assert.match(css, /font-size: clamp\(25px, 3\.5vw, 48px\);/u);
+  assert.doesNotMatch(css, /\.evs-intensive-sentence \{[^}]*display: flex;/u);
   assert.match(css, /\.evs-intensive-button:active:not\(:disabled\)/u);
   assert.doesNotMatch(css, /\.evs-transcript-tools/u);
   assert.doesNotMatch(css, /data:image|--evs-cork|paper-texture/u);
