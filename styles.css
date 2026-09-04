@@ -579,7 +579,8 @@
 }
 
 .evs-intensive-reveal,
-.evs-intensive-translate {
+.evs-intensive-translate,
+.evs-intensive-analyze {
   min-width: 120px;
   min-height: 42px;
   border-color: color-mix(in srgb, var(--background-modifier-border) 72%, transparent);
@@ -594,6 +595,7 @@
 
 .evs-intensive-reveal:active:not(:disabled),
 .evs-intensive-translate:active:not(:disabled),
+.evs-intensive-analyze:active:not(:disabled),
 .evs-intensive-button:active:not(:disabled),
 .evs-intensive-header .evs-listening-mode-toggle:active:not(:disabled) {
   transform: scale(0.97);
@@ -721,9 +723,45 @@
   color: var(--text-error);
 }
 
+.evs-intensive-analysis {
+  max-height: min(34vh, 360px);
+  overflow-y: auto;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--interactive-accent) 24%, var(--background-modifier-border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--background-primary) 84%, transparent);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 8%), inset 0 1px 0 rgb(255 255 255 / 18%);
+  backdrop-filter: blur(18px) saturate(150%);
+  color: var(--text-normal);
+  line-height: 1.6;
+}
+
+.evs-intensive-analysis-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.evs-intensive-analysis-kicker {
+  margin-bottom: 4px;
+  color: var(--text-accent);
+  font-size: var(--font-ui-smaller);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.evs-intensive-analysis.is-loading {
+  color: var(--text-muted);
+}
+
+.evs-intensive-analysis.is-error {
+  border-color: color-mix(in srgb, var(--text-error) 38%, var(--background-modifier-border));
+  color: var(--text-error);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .evs-intensive-reveal,
   .evs-intensive-translate,
+  .evs-intensive-analyze,
   .evs-intensive-button,
   .evs-intensive-header .evs-listening-mode-toggle {
     transition: none;

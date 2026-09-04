@@ -60,7 +60,8 @@ export class TranslationService {
   async analyzeSentence(
     sourceText: string,
     profile: StudyProfile,
-    dictionaryHints: readonly StudyDictionaryHint[]
+    dictionaryHints: readonly StudyDictionaryHint[],
+    options: { compact?: boolean } = {}
   ): Promise<StudyAnalysisResult> {
     const config = this.resolveConfig();
     const body = buildStudyAnalysisRequestBody(
@@ -68,7 +69,8 @@ export class TranslationService {
       config.model,
       sourceText,
       profile,
-      dictionaryHints
+      dictionaryHints,
+      options
     );
     const payload = await this.request(config, body, "知识卡");
     const parsed = parseStudyAnalysisResult(payload, sourceText);

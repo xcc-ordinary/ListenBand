@@ -46,6 +46,18 @@ test("六个学习目标生成独立提示且 DeepSeek 与 Kimi 关闭思考模�
   );
   assert.match(ielts.messages[0]?.content ?? "", /只服务于 IELTS 学习/u);
   assert.match(ielts.messages[1]?.content ?? "", /雅思听力/u);
+
+  const intensive = buildStudyAnalysisRequestBody(
+    "deepseek",
+    "model",
+    "I study English.",
+    "ielts",
+    [],
+    { compact: true }
+  );
+  assert.equal(intensive.max_tokens, 900);
+  assert.match(intensive.messages[1]?.content ?? "", /单句精听快速赏析/u);
+  assert.match(intensive.messages[1]?.content ?? "", /雅思/u);
 });
 
 test("解析完整知识卡并接受 JSON 代码围栏", () => {

@@ -289,7 +289,8 @@ export function buildStudyAnalysisRequestBody(
   model: string,
   sourceText: string,
   profile: StudyProfile,
-  dictionaryHints: readonly StudyDictionaryHint[]
+  dictionaryHints: readonly StudyDictionaryHint[],
+  options: { compact?: boolean } = {}
 ): TranslationRequestBody {
   const hints = dictionaryHints.slice(0, 12).map((hint) => ({
     word: hint.word,
@@ -304,13 +305,16 @@ export function buildStudyAnalysisRequestBody(
         content: JSON.stringify({
           studyGoal: STUDY_PROFILE_LABELS[profile],
           instructions: PROFILE_INSTRUCTIONS[profile],
+          responseMode: options.compact
+            ? "单句精听快速赏析：只保留最有雅思价值的内容，优先短语与语法；重点短语最多 3 项，语法最多 2 项，延伸最多 1 项，中文务必简洁。"
+            : "完整知识卡",
           dictionaryTagsForReferenceOnly: hints,
           sentence: sourceText
         })
       }
     ],
     stream: false,
-    max_tokens: 1_600
+    max_tokens: options.compact ? 900 : 1_600
   };
   if (provider === "deepseek" || provider === "kimi") {
     body.thinking = { type: "disabled" };

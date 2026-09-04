@@ -139,8 +139,10 @@ interface SegmentTranslationView {
   studyEntries: Partial<Record<StudyProfile, StudyCacheEntry>>;
   visible: boolean;
   loading: boolean;
-  loadingAction: "translate" | "retranslate" | "supplement" | null;
+  loadingAction: "translate" | "retranslate" | "supplement" | "analyze" | null;
+  intensiveAnalysisVisible: boolean;
   errorMessage: string | null;
+  intensiveErrorTarget: "translation" | "analysis" | null;
   statusTone: "error" | "warning" | null;
   requestGeneration: number;
 }
@@ -443,6 +445,8 @@ class ListenBandRenderChild extends MarkdownRenderChild {
   private intensiveRevealButton: HTMLButtonElement | null = null;
   private intensiveTranslateButton: HTMLButtonElement | null = null;
   private intensiveTranslationEl: HTMLElement | null = null;
+  private intensiveAnalyzeButton: HTMLButtonElement | null = null;
+  private intensiveAnalysisEl: HTMLElement | null = null;
   private intensiveSentenceRevealed = false;
   private intensiveDictationDraft = "";
   private readonly intensiveSentenceStates = new Map<number, {
@@ -597,6 +601,8 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     this.intensiveRevealButton = null;
     this.intensiveTranslateButton = null;
     this.intensiveTranslationEl = null;
+    this.intensiveAnalyzeButton = null;
+    this.intensiveAnalysisEl = null;
     this.intensiveSentenceRevealed = false;
     this.intensiveDictationDraft = "";
     this.intensiveSentenceStates.clear();
@@ -1364,7 +1370,9 @@ class ListenBandRenderChild extends MarkdownRenderChild {
         visible: false,
         loading: false,
         loadingAction: null,
+        intensiveAnalysisVisible: false,
         errorMessage: null,
+        intensiveErrorTarget: null,
         statusTone: null,
         requestGeneration: 0
       };
@@ -1448,6 +1456,13 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     translate.type = "button";
     translate.addEventListener("click", () => this.handleIntensiveTranslationAction());
     this.intensiveTranslateButton = translate;
+    const analyze = actions.createEl("button", {
+      cls: "evs-button evs-intensive-analyze",
+      text: "AI 赏析"
+    });
+    analyze.type = "button";
+    analyze.addEventListener("click", () => this.handleIntensiveAnalysisAction());
+    this.intensiveAnalyzeButton = analyze;
 
     const dictation = focus.createDiv({ cls: "evs-intensive-dictation" });
     const dictationLabel = dictation.createDiv({
@@ -1475,6 +1490,11 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     this.intensiveTranslationEl.setAttribute("lang", "zh-CN");
     this.intensiveTranslationEl.setAttribute("role", "status");
     this.intensiveTranslationEl.hide();
+    this.intensiveAnalysisEl = dictation.createDiv({ cls: "evs-intensive-analysis" });
+    this.intensiveAnalysisEl.setAttribute("lang", "zh-CN");
+    this.intensiveAnalysisEl.setAttribute("role", "region");
+    this.intensiveAnalysisEl.setAttribute("aria-label", "当前句的雅思 AI 赏析");
+    this.intensiveAnalysisEl.hide();
     const controls = panel.createDiv({ cls: "evs-intensive-controls" });
     this.intensivePreviousButton = this.createIntensiveButton(
       controls,
@@ -1588,6 +1608,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       this.intensiveNextButton.disabled = this.intensiveSegmentIndex >= segments.length - 1;
     }
     this.updateIntensiveTranslation();
+    this.updateIntensiveAnalysis();
   }
 
   private playIntensiveSegment(index: number): void {
@@ -1620,11 +1641,28 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     if (this.hasTranslationOutput(view)) {
       view.visible = !view.visible;
       view.errorMessage = null;
+      view.intensiveErrorTarget = null;
       view.statusTone = null;
       this.updateTranslationView(view);
       return;
     }
     void this.requestTranslation(this.intensiveSegmentIndex, "translate");
+  }
+
+  private handleIntensiveAnalysisAction(): void {
+    const view = this.translationViews[this.intensiveSegmentIndex];
+    if (!view || view.loading || this.destroyed) {
+      return;
+    }
+    if (view.studyEntries[IELTS_STUDY_PROFILE]) {
+      view.intensiveAnalysisVisible = !view.intensiveAnalysisVisible;
+      view.errorMessage = null;
+      view.intensiveErrorTarget = null;
+      view.statusTone = null;
+      this.updateTranslationView(view);
+      return;
+    }
+    void this.requestTranslation(this.intensiveSegmentIndex, "analyze");
   }
 
   private updateIntensiveTranslation(): void {
@@ -1639,14 +1677,16 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       ?? "";
     button.disabled = view.loading || this.translationBatchRunning;
     button.setText(
-      view.loading
+      view.loading && view.loadingAction !== "analyze"
         ? "翻译中…"
         : translation
           ? view.visible ? "隐藏翻译" : "显示翻译"
-          : view.errorMessage ? "重试翻译" : "翻译"
+          : view.errorMessage && view.intensiveErrorTarget !== "analysis"
+            ? "重试翻译"
+            : "翻译"
     );
     button.setAttribute("aria-expanded", (Boolean(translation) && view.visible).toString());
-    if (view.errorMessage) {
+    if (view.errorMessage && view.intensiveErrorTarget !== "analysis") {
       output.setText(view.errorMessage);
       output.classList.add("is-error");
       output.show();
@@ -1657,6 +1697,56 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     } else if (translation && view.visible) {
       output.setText(translation);
       output.classList.remove("is-error");
+      output.show();
+    } else {
+      output.empty();
+      output.classList.remove("is-error");
+      output.hide();
+    }
+  }
+
+  private updateIntensiveAnalysis(): void {
+    const button = this.intensiveAnalyzeButton;
+    const output = this.intensiveAnalysisEl;
+    const view = this.translationViews[this.intensiveSegmentIndex];
+    if (!button || !output || !view) {
+      return;
+    }
+    const studyEntry = view.studyEntries[IELTS_STUDY_PROFILE] ?? null;
+    button.disabled = view.loading || this.translationBatchRunning;
+    button.setText(
+      view.loading && view.loadingAction === "analyze"
+        ? "赏析中…"
+        : studyEntry
+          ? view.intensiveAnalysisVisible ? "隐藏赏析" : "显示赏析"
+          : view.errorMessage && view.intensiveErrorTarget === "analysis"
+            ? "重试赏析"
+            : "AI 赏析"
+    );
+    button.setAttribute(
+      "aria-expanded",
+      (Boolean(studyEntry) && view.intensiveAnalysisVisible).toString()
+    );
+    output.classList.toggle(
+      "is-loading",
+      view.loading && view.loadingAction === "analyze"
+    );
+    if (view.loading && view.loadingAction === "analyze") {
+      output.empty();
+      output.createDiv({ cls: "evs-intensive-analysis-kicker", text: "IELTS AI" });
+      output.createDiv({ text: "正在提炼语法、短语与雅思考点…" });
+      output.show();
+    } else if (view.errorMessage && view.intensiveErrorTarget === "analysis") {
+      output.empty();
+      output.createDiv({ cls: "evs-intensive-analysis-kicker", text: "赏析未完成" });
+      output.createDiv({ text: view.errorMessage });
+      output.classList.add("is-error");
+      output.show();
+    } else if (studyEntry && view.intensiveAnalysisVisible) {
+      output.empty();
+      output.classList.remove("is-error");
+      const grid = output.createDiv({ cls: "evs-intensive-analysis-grid" });
+      this.renderStudyDetails(grid, studyEntry, true);
       output.show();
     } else {
       output.empty();
@@ -1883,9 +1973,11 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       }
     }
     view.visible = false;
+    view.intensiveAnalysisVisible = false;
     view.loading = false;
     view.loadingAction = null;
     view.errorMessage = null;
+    view.intensiveErrorTarget = null;
     view.statusTone = null;
     this.updateTranslationView(view);
     this.scheduleTranscriptLayout(true);
@@ -1972,6 +2064,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     }
     if (view === this.translationViews[this.intensiveSegmentIndex]) {
       this.updateIntensiveTranslation();
+      this.updateIntensiveAnalysis();
     }
     this.scheduleTranscriptLayout(true);
   }
@@ -2099,11 +2192,22 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       return;
     }
 
-    const profileBadge = view.outputEl.createDiv({ cls: "evs-study-profile-badge" });
-    profileBadge.setText(`按${this.plugin.getStudyProfileLabel(studyEntry.profile)}范围讲解`);
+    this.renderStudyDetails(view.outputEl, studyEntry, false);
+  }
+
+  private renderStudyDetails(
+    parent: HTMLElement,
+    studyEntry: StudyCacheEntry,
+    intensive: boolean
+  ): void {
+    const profileBadge = parent.createDiv({ cls: "evs-study-profile-badge" });
+    profileBadge.setText(intensive ? "IELTS 单句赏析" : `按${this.plugin.getStudyProfileLabel(studyEntry.profile)}范围讲解`);
     if (studyEntry.analysis.keyPoints.length > 0) {
-      const section = view.outputEl.createDiv({ cls: "evs-study-section" });
-      section.createDiv({ cls: "evs-study-heading", text: "重点词汇与搭配" });
+      const section = parent.createDiv({ cls: "evs-study-section" });
+      section.createDiv({
+        cls: "evs-study-heading",
+        text: intensive ? "雅思重点短语" : "重点词汇与搭配"
+      });
       const list = section.createEl("ul", { cls: "evs-study-list" });
       for (const point of studyEntry.analysis.keyPoints) {
         const item = list.createEl("li");
@@ -2113,8 +2217,11 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       }
     }
     if (studyEntry.analysis.grammar.length > 0) {
-      const section = view.outputEl.createDiv({ cls: "evs-study-section" });
-      section.createDiv({ cls: "evs-study-heading", text: "语法与句型" });
+      const section = parent.createDiv({ cls: "evs-study-section" });
+      section.createDiv({
+        cls: "evs-study-heading",
+        text: intensive ? "雅思语法与句型" : "语法与句型"
+      });
       const list = section.createEl("ul", { cls: "evs-study-list" });
       for (const grammar of studyEntry.analysis.grammar) {
         const item = list.createEl("li");
@@ -2122,14 +2229,20 @@ class ListenBandRenderChild extends MarkdownRenderChild {
         item.createDiv({ cls: "evs-study-note", text: grammar.explanation });
       }
     }
-    const tip = view.outputEl.createDiv({ cls: "evs-study-section evs-study-exam-tip" });
-    tip.createDiv({ cls: "evs-study-heading", text: "备考提示" });
+    const tip = parent.createDiv({ cls: "evs-study-section evs-study-exam-tip" });
+    tip.createDiv({
+      cls: "evs-study-heading",
+      text: intensive ? "雅思备考提示" : "备考提示"
+    });
     tip.createDiv({ text: studyEntry.analysis.examTip });
 
     const extensions = studyEntry.analysis.extensions ?? [];
     if (extensions.length > 0) {
-      const section = view.outputEl.createDiv({ cls: "evs-study-section evs-study-extensions" });
-      section.createDiv({ cls: "evs-study-heading", text: "延伸拓展" });
+      const section = parent.createDiv({ cls: "evs-study-section evs-study-extensions" });
+      section.createDiv({
+        cls: "evs-study-heading",
+        text: intensive ? "雅思迁移表达" : "延伸拓展"
+      });
       const list = section.createDiv({ cls: "evs-study-extension-list" });
       for (const extension of extensions) {
         const item = list.createDiv({ cls: "evs-study-extension-item" });
@@ -2150,7 +2263,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
 
   private async requestTranslation(
     index: number,
-    action: "translate" | "retranslate" | "supplement"
+    action: "translate" | "retranslate" | "supplement" | "analyze"
   ): Promise<void> {
     const transcript = this.transcript;
     const segment = transcript?.segments[index];
@@ -2165,12 +2278,13 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     view.loading = true;
     view.loadingAction = action;
     view.errorMessage = null;
+    view.intensiveErrorTarget = null;
     view.statusTone = null;
     this.updateTranslationView(view);
 
     let result: StudyAnalysisResult;
     try {
-      result = await this.plugin.analyzeSentence(segment.text, profile);
+      result = await this.plugin.analyzeSentence(segment.text, profile, action === "analyze");
     } catch (error) {
       if (this.destroyed || view.requestGeneration !== generation) {
         return;
@@ -2179,6 +2293,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       view.loading = false;
       view.loadingAction = null;
       view.errorMessage = error instanceof Error ? error.message : "知识卡生成失败，请稍后重试。";
+      view.intensiveErrorTarget = action === "analyze" ? "analysis" : "translation";
       view.statusTone = "error";
       this.updateTranslationView(view);
       return;
@@ -2217,12 +2332,19 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     } else if (!studyEntry) {
       delete view.studyEntries[profile];
     }
-    view.visible = true;
+    if (action === "analyze") {
+      view.intensiveAnalysisVisible = Boolean(studyEntry);
+    } else {
+      view.visible = true;
+    }
     view.loading = false;
     view.loadingAction = null;
     view.errorMessage = !result.analysis && previousStudyEntry
       ? `${result.warning ?? "新的知识点格式异常。"} 已保留原来的完整知识卡。`
       : result.warning;
+    view.intensiveErrorTarget = view.errorMessage
+      ? action === "analyze" ? "analysis" : "translation"
+      : null;
     view.statusTone = view.errorMessage ? result.analysis ? "warning" : "error" : null;
     this.updateTranslationView(view);
 
@@ -3842,12 +3964,14 @@ export default class ListenBandPlugin extends Plugin {
 
   async analyzeSentence(
     sourceText: string,
-    profile: StudyProfile
+    profile: StudyProfile,
+    compact = false
   ): Promise<StudyAnalysisResult> {
     return this.getTranslationService().analyzeSentence(
       sourceText,
       profile,
-      this.collectDictionaryHints(sourceText)
+      this.collectDictionaryHints(sourceText),
+      { compact }
     );
   }
 

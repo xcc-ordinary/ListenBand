@@ -350,6 +350,14 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(mainSource, /hotkeys:\s*\[\{ modifiers:\s*\[\], key:\s*defaultKey \}\]/u);
   assert.match(mainSource, /handleIntensiveTranslationAction/u);
   assert.match(mainSource, /updateIntensiveTranslation/u);
+  assert.match(mainSource, /handleIntensiveAnalysisAction/u);
+  assert.match(mainSource, /updateIntensiveAnalysis/u);
+  assert.match(mainSource, /AI 赏析/u);
+  assert.match(mainSource, /雅思重点短语/u);
+  assert.match(mainSource, /雅思语法与句型/u);
+  assert.match(mainSource, /雅思备考提示/u);
+  assert.match(mainSource, /requestTranslation\(this\.intensiveSegmentIndex, "analyze"\)/u);
+  assert.match(mainSource, /analyzeSentence\(segment\.text, profile, action === "analyze"\)/u);
   assert.match(
     mainSource,
     /private updateIntensiveListeningPanel\(\)[\s\S]*?this\.updateIntensiveTranslation\(\);[\s\S]*?private playIntensiveSegment/u
@@ -373,6 +381,8 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(css, /\.evs-intensive-dictation-input \{/u);
   assert.match(css, /\.evs-intensive-comparison \{/u);
   assert.match(css, /\.evs-intensive-translation \{/u);
+  assert.match(css, /\.evs-intensive-analysis \{/u);
+  assert.match(css, /\.evs-intensive-analysis-grid \{/u);
   assert.match(css, /font-size: clamp\(25px, 3\.5vw, 48px\);/u);
   assert.doesNotMatch(css, /\.evs-intensive-sentence \{[^}]*display: flex;/u);
   assert.match(css, /\.evs-intensive-button:active:not\(:disabled\)/u);
@@ -454,7 +464,7 @@ test("生词本使用独立串行存储并注册两个入口命令", async () =>
 test("知识卡保留旧译文并且只有用户点击才请求分析", async () => {
   const source = await readFile("src/main.ts", "utf8");
   assert.match(source, /"lightbulb", "补充知识点"/u);
-  assert.match(source, /this\.plugin\.analyzeSentence\(segment\.text, profile\)/u);
+  assert.match(source, /this\.plugin\.analyzeSentence\(segment\.text, profile, action === "analyze"\)/u);
   assert.match(source, /this\.plugin\.saveTranslationCache/u);
   assert.match(source, /this\.plugin\.saveStudyCache/u);
   assert.match(source, /text: result\.translation/u);
@@ -482,7 +492,7 @@ test("字幕编辑与翻译共用右侧固定操作栏", async () => {
   assert.match(source, /setIcon\(button, iconName\)/u);
   assert.match(source, /view\.outputEl\.appendChild\(view\.retranslateButton\)/u);
   assert.match(source, /legacyRow\.appendChild\(view\.supplementButton\)/u);
-  assert.match(source, /text: "延伸拓展"/u);
+  assert.match(source, /intensive \? "雅思迁移表达" : "延伸拓展"/u);
   assert.match(source, /studyEntry\.analysis\.extensions \?\? \[\]/u);
   assert.match(source, /由原句中的“\$\{extension\.anchor\}”延伸/u);
   assert.match(source, /this\.handlePrimaryTranslationAction\(index\)/u);
