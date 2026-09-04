@@ -4,6 +4,13 @@ All notable changes to ListenBand are documented in this file.
 
 ## Unreleased
 
+## 1.0.1 - 2026-09-03
+
+### Fixed
+
+- Routed the four intensive-listening arrow shortcuts through Obsidian commands so user-defined hotkeys fully replace the defaults
+- Removed hard-coded page-level arrow-key listeners and stale shortcut labels from the intensive-listening controls
+
 ## 1.2.2 - 2026-08-28
 
 ### Changed

@@ -341,12 +341,13 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(mainSource, /intensiveSentenceStates = new Map/u);
   assert.match(mainSource, /saveIntensiveSentenceState/u);
   assert.match(mainSource, /restoreIntensiveSentenceState/u);
-  assert.match(mainSource, /event\.key === "ArrowUp"/u);
-  assert.match(mainSource, /event\.key === "ArrowDown"/u);
-  assert.match(mainSource, /event\.key === "ArrowLeft"/u);
-  assert.match(mainSource, /event\.key === "ArrowRight"/u);
-  assert.match(mainSource, /event\.preventDefault\(\)/u);
-  assert.match(mainSource, /aria-keyshortcuts/u);
+  assert.doesNotMatch(mainSource, /intensiveKeydownHandler/u);
+  assert.doesNotMatch(mainSource, /aria-keyshortcuts/u);
+  assert.match(mainSource, /"intensive-previous-sentence",[\s\S]*?"previous",[\s\S]*?"ArrowLeft"/u);
+  assert.match(mainSource, /"intensive-next-sentence",[\s\S]*?"next",[\s\S]*?"ArrowRight"/u);
+  assert.match(mainSource, /"intensive-repeat-sentence",[\s\S]*?"repeat",[\s\S]*?"ArrowDown"/u);
+  assert.match(mainSource, /"intensive-toggle-original",[\s\S]*?"toggle-original",[\s\S]*?"ArrowUp"/u);
+  assert.match(mainSource, /hotkeys:\s*\[\{ modifiers:\s*\[\], key:\s*defaultKey \}\]/u);
   assert.match(mainSource, /handleIntensiveTranslationAction/u);
   assert.match(mainSource, /updateIntensiveTranslation/u);
   assert.match(

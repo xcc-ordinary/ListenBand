@@ -514,34 +514,6 @@ class ListenBandRenderChild extends MarkdownRenderChild {
   private lookupHighlightEl: HTMLElement | null = null;
   private vocabularyTargetRowEl: HTMLElement | null = null;
   private vocabularyNavigationIndex: number | null = null;
-  private readonly intensiveKeydownHandler = (event: KeyboardEvent): void => {
-    if (
-      this.destroyed
-      || this.listeningMode !== "intensive"
-      || event.defaultPrevented
-      || event.repeat
-      || event.altKey
-      || event.ctrlKey
-      || event.metaKey
-      || event.shiftKey
-    ) {
-      return;
-    }
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      this.toggleIntensiveSentenceReveal();
-    } else if (event.key === "ArrowDown") {
-      event.preventDefault();
-      this.playIntensiveSegment(this.intensiveSegmentIndex);
-    } else if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      this.playIntensiveSegment(this.intensiveSegmentIndex - 1);
-    } else if (event.key === "ArrowRight") {
-      event.preventDefault();
-      this.playIntensiveSegment(this.intensiveSegmentIndex + 1);
-    }
-  };
-
   constructor(
     containerEl: HTMLElement,
     plugin: ListenBandPlugin,
@@ -556,14 +528,12 @@ class ListenBandRenderChild extends MarkdownRenderChild {
 
   onload(): void {
     this.plugin.registerStudyRenderer(this);
-    window.addEventListener("keydown", this.intensiveKeydownHandler);
     this.renderLoadingShell();
     void this.initialize();
   }
 
   onunload(): void {
     this.destroyed = true;
-    window.removeEventListener("keydown", this.intensiveKeydownHandler);
     this.plugin.unregisterStudyRenderer(this);
     this.localSeekGeneration += 1;
     this.fullWidthObserver?.disconnect();
@@ -1465,11 +1435,10 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     const actions = focus.createDiv({ cls: "evs-intensive-focus-actions" });
     const reveal = actions.createEl("button", {
       cls: "evs-button evs-intensive-reveal",
-      text: "显示原文 ↑"
+      text: "显示原文"
     });
     reveal.type = "button";
     reveal.setAttribute("aria-pressed", "false");
-    reveal.setAttribute("aria-keyshortcuts", "ArrowUp");
     reveal.addEventListener("click", () => this.toggleIntensiveSentenceReveal());
     this.intensiveRevealButton = reveal;
     const translate = actions.createEl("button", {
@@ -1509,23 +1478,20 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     const controls = panel.createDiv({ cls: "evs-intensive-controls" });
     this.intensivePreviousButton = this.createIntensiveButton(
       controls,
-      "← 上一句",
+      "上一句",
       () => this.playIntensiveSegment(this.intensiveSegmentIndex - 1)
     );
-    this.intensivePreviousButton.setAttribute("aria-keyshortcuts", "ArrowLeft");
-    const repeat = this.createIntensiveButton(
+    this.createIntensiveButton(
       controls,
-      "重复 ↓",
+      "重复",
       () => this.playIntensiveSegment(this.intensiveSegmentIndex),
       "is-repeat"
     );
-    repeat.setAttribute("aria-keyshortcuts", "ArrowDown");
     this.intensiveNextButton = this.createIntensiveButton(
       controls,
-      "下一句 →",
+      "下一句",
       () => this.playIntensiveSegment(this.intensiveSegmentIndex + 1)
     );
-    this.intensiveNextButton.setAttribute("aria-keyshortcuts", "ArrowRight");
     this.intensivePanelEl = panel;
     this.updateIntensiveListeningPanel();
   }
@@ -3467,22 +3433,26 @@ export default class ListenBandPlugin extends Plugin {
     this.registerIntensiveListeningCommand(
       "intensive-previous-sentence",
       "单句精听：上一句",
-      "previous"
+      "previous",
+      "ArrowLeft"
     );
     this.registerIntensiveListeningCommand(
       "intensive-next-sentence",
       "单句精听：下一句",
-      "next"
+      "next",
+      "ArrowRight"
     );
     this.registerIntensiveListeningCommand(
       "intensive-repeat-sentence",
       "单句精听：重复当前句",
-      "repeat"
+      "repeat",
+      "ArrowDown"
     );
     this.registerIntensiveListeningCommand(
       "intensive-toggle-original",
       "单句精听：显示或隐藏原文",
-      "toggle-original"
+      "toggle-original",
+      "ArrowUp"
     );
 
     this.addCommand({
@@ -3994,11 +3964,13 @@ export default class ListenBandPlugin extends Plugin {
   private registerIntensiveListeningCommand(
     id: string,
     name: string,
-    command: IntensiveListeningCommand
+    command: IntensiveListeningCommand,
+    defaultKey: string
   ): void {
     this.addCommand({
       id,
       name,
+      hotkeys: [{ modifiers: [], key: defaultKey }],
       checkCallback: (checking) => {
         const renderer = this.getActiveIntensiveRenderer();
         if (!renderer) {
