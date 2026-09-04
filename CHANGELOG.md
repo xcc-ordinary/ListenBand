@@ -4,6 +4,18 @@ All notable changes to ListenBand are documented in this file.
 
 ## Unreleased
 
+## 1.0.2 - 2026-09-04
+
+### Added
+
+- Added fast IELTS-focused AI analysis to single-sentence intensive listening
+- Highlights high-value phrases, grammar patterns, exam tips, and reusable expressions
+- Reuses cached analysis so revisiting a sentence is immediate
+
+### Fixed
+
+- Kept translation and AI-analysis loading and error states independent
+
 ## 1.0.1 - 2026-09-03
 
 ### Fixed
