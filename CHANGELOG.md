@@ -4,6 +4,13 @@ All notable changes to ListenBand are documented in this file.
 
 ## Unreleased
 
+## 1.0.3 - 2026-09-05
+
+### Fixed
+
+- Made long single-sentence analysis content scroll correctly on short screens and under larger display scaling
+- Kept the sentence header and playback controls reachable when themes or fonts increase content height
+
 ## 1.0.2 - 2026-09-04
 
 ### Added
