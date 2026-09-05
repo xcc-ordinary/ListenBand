@@ -1748,7 +1748,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       view.loading && view.loadingAction !== "analyze"
         ? "翻译中…"
         : translation
-          ? view.visible ? "隐藏翻译" : "显示翻译"
+          ? view.visible ? "隐藏翻译" : "翻译"
           : view.errorMessage && view.intensiveErrorTarget !== "analysis"
             ? "重试翻译"
             : "翻译"
@@ -1786,7 +1786,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       view.loading && view.loadingAction === "analyze"
         ? "赏析中…"
         : studyEntry
-          ? view.intensiveAnalysisVisible ? "隐藏赏析" : "显示赏析"
+          ? view.intensiveAnalysisVisible ? "隐藏赏析" : "AI 赏析"
           : view.errorMessage && view.intensiveErrorTarget === "analysis"
             ? "重试赏析"
             : "AI 赏析"

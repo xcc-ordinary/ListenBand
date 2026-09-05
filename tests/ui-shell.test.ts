@@ -365,6 +365,14 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(mainSource, /updateIntensiveTranslation/u);
   assert.match(mainSource, /handleIntensiveAnalysisAction/u);
   assert.match(mainSource, /updateIntensiveAnalysis/u);
+  assert.match(
+    mainSource,
+    /private updateIntensiveTranslation\(\)[\s\S]*?view\.visible \? "隐藏翻译" : "翻译"[\s\S]*?private updateIntensiveAnalysis\(\)/u
+  );
+  assert.match(
+    mainSource,
+    /private updateIntensiveAnalysis\(\)[\s\S]*?view\.intensiveAnalysisVisible \? "隐藏赏析" : "AI 赏析"[\s\S]*?private saveIntensiveSentenceState\(\)/u
+  );
   assert.match(mainSource, /AI 赏析/u);
   assert.match(mainSource, /雅思重点短语/u);
   assert.match(mainSource, /雅思语法与句型/u);
