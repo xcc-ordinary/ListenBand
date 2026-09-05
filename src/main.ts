@@ -26,9 +26,14 @@ import {
 import { createSegmentFingerprint, getTranslationCachePath } from "./translation-core";
 import {
   TranslationService,
+  type DictationReviewResult,
   type StudyAnalysisResult,
   type TranslationResult
 } from "./translation";
+import {
+  createDictationReviewCacheKey,
+  type DictationReview
+} from "./dictation-review-core";
 import {
   createStudyFingerprint,
   STUDY_ANALYSIS_VERSION,
@@ -464,6 +469,11 @@ class ListenBandRenderChild extends MarkdownRenderChild {
   private intensiveMemorySaveTimer: number | null = null;
   private intensiveDictationInput: HTMLTextAreaElement | null = null;
   private intensiveComparisonEl: HTMLElement | null = null;
+  private intensiveReviewEl: HTMLElement | null = null;
+  private readonly intensiveReviewCache = new Map<string, DictationReviewResult>();
+  private intensiveReviewLoadingKey: string | null = null;
+  private intensiveReviewError: string | null = null;
+  private intensiveReviewRequestGeneration = 0;
   private intensivePositionEl: HTMLElement | null = null;
   private intensivePreviousButton: HTMLButtonElement | null = null;
   private intensiveNextButton: HTMLButtonElement | null = null;
@@ -625,6 +635,11 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     }
     this.intensiveDictationInput = null;
     this.intensiveComparisonEl = null;
+    this.intensiveReviewEl = null;
+    this.intensiveReviewCache.clear();
+    this.intensiveReviewLoadingKey = null;
+    this.intensiveReviewError = null;
+    this.intensiveReviewRequestGeneration += 1;
     this.intensivePositionEl = null;
     this.intensivePreviousButton = null;
     this.intensiveNextButton = null;
@@ -1517,12 +1532,17 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       this.saveIntensiveSentenceState();
       this.intensiveDirtySentenceIndices.add(this.intensiveSegmentIndex);
       this.scheduleIntensiveMemorySave();
+      this.resetIntensiveReviewState();
       this.updateIntensiveComparison();
     });
     this.intensiveDictationInput = input;
     this.intensiveComparisonEl = dictation.createDiv({
       cls: "evs-intensive-comparison"
     });
+    this.intensiveReviewEl = dictation.createDiv({ cls: "evs-intensive-review" });
+    this.intensiveReviewEl.setAttribute("role", "status");
+    this.intensiveReviewEl.setAttribute("aria-live", "polite");
+    this.intensiveReviewEl.hide();
     this.intensiveTranslationEl = dictation.createDiv({
       cls: "evs-intensive-translation"
     });
@@ -1638,6 +1658,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       this.intensiveDictationInput.value = this.intensiveDictationDraft;
     }
     this.updateIntensiveComparison();
+    this.updateIntensiveReview();
     this.intensivePositionEl?.setText(
       `第 ${this.intensiveSegmentIndex + 1} / ${segments.length} 句 · ${formatTimestamp(segment.start)}`
     );
@@ -1662,6 +1683,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     this.intensiveSegmentIndex = index;
     this.intensiveStopArmed = true;
     if (changingSentence) {
+      this.resetIntensiveReviewState();
       this.restoreIntensiveSentenceState(index);
     }
     this.updateIntensiveListeningPanel();
@@ -1674,6 +1696,9 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     this.intensiveDirtySentenceIndices.add(this.intensiveSegmentIndex);
     this.persistIntensiveSentenceState();
     this.updateIntensiveListeningPanel();
+    if (this.intensiveSentenceRevealed) {
+      void this.requestIntensiveDictationReview();
+    }
   }
 
   private handleIntensiveTranslationAction(): void {
@@ -1909,6 +1934,123 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       .replace(/[^\p{L}\p{N}]+/gu, " ")
       .trim()
       .replace(/\s+/gu, " ");
+  }
+
+  private resetIntensiveReviewState(): void {
+    this.intensiveReviewRequestGeneration += 1;
+    this.intensiveReviewLoadingKey = null;
+    this.intensiveReviewError = null;
+    this.updateIntensiveReview();
+  }
+
+  private updateIntensiveReview(): void {
+    const output = this.intensiveReviewEl;
+    const original = this.transcript?.segments[this.intensiveSegmentIndex]?.text ?? "";
+    const draft = this.intensiveDictationDraft.trim();
+    if (!output) {
+      return;
+    }
+    output.empty();
+    output.classList.remove("is-loading", "is-error", "is-correct", "is-minor", "is-revise");
+    if (!this.intensiveSentenceRevealed || draft === "" || original === "") {
+      output.hide();
+      return;
+    }
+    if (this.normalizeDictationText(draft) === this.normalizeDictationText(original)) {
+      this.renderIntensiveReview(output, {
+        verdict: "correct",
+        score: 100,
+        summary: "默写准确，大小写与标点差异已忽略。",
+        corrections: [],
+        ieltsTip: "继续保持整句听辨，并留意连读和弱读。"
+      });
+      output.show();
+      return;
+    }
+    const key = createDictationReviewCacheKey(original, draft);
+    const cached = this.intensiveReviewCache.get(key);
+    if (cached) {
+      this.renderIntensiveReview(output, cached);
+      output.show();
+      return;
+    }
+    if (this.intensiveReviewLoadingKey === key) {
+      output.classList.add("is-loading");
+      output.createDiv({ cls: "evs-intensive-review-kicker", text: "IELTS AI 批改中…" });
+      output.createDiv({ text: "正在核对漏词、拼写和语法，请稍候。" });
+      output.show();
+      return;
+    }
+    if (this.intensiveReviewError) {
+      output.classList.add("is-error");
+      output.createDiv({ cls: "evs-intensive-review-kicker", text: "AI 批改未完成" });
+      output.createDiv({ text: this.intensiveReviewError });
+      output.show();
+      return;
+    }
+    output.hide();
+  }
+
+  private renderIntensiveReview(parent: HTMLElement, review: DictationReview): void {
+    parent.classList.add(`is-${review.verdict}`);
+    parent.createDiv({
+      cls: "evs-intensive-review-kicker",
+      text: `IELTS AI 批改 · ${review.score} 分`
+    });
+    parent.createDiv({ cls: "evs-intensive-review-summary", text: review.summary });
+    for (const correction of review.corrections) {
+      const item = parent.createDiv({ cls: "evs-intensive-review-item" });
+      const change = item.createDiv({ cls: "evs-intensive-review-change" });
+      change.createSpan({ text: correction.issue });
+      change.createSpan({ cls: "evs-intensive-review-arrow", text: "→" });
+      change.createSpan({ text: correction.correction });
+      item.createDiv({ cls: "evs-intensive-review-explanation", text: correction.explanation });
+    }
+    const tip = parent.createDiv({ cls: "evs-intensive-review-tip" });
+    tip.createSpan({ cls: "evs-intensive-review-tip-label", text: "IELTS 提示" });
+    tip.createSpan({ text: review.ieltsTip });
+  }
+
+  private async requestIntensiveDictationReview(): Promise<void> {
+    const original = this.transcript?.segments[this.intensiveSegmentIndex]?.text ?? "";
+    const draft = this.intensiveDictationDraft.trim();
+    if (
+      !this.intensiveSentenceRevealed ||
+      draft === "" ||
+      original === "" ||
+      this.normalizeDictationText(draft) === this.normalizeDictationText(original)
+    ) {
+      this.updateIntensiveReview();
+      return;
+    }
+    const key = createDictationReviewCacheKey(original, draft);
+    if (this.intensiveReviewCache.has(key)) {
+      this.updateIntensiveReview();
+      return;
+    }
+    const generation = this.intensiveReviewRequestGeneration + 1;
+    this.intensiveReviewRequestGeneration = generation;
+    this.intensiveReviewLoadingKey = key;
+    this.intensiveReviewError = null;
+    this.updateIntensiveReview();
+    try {
+      const result = await this.plugin.reviewDictation(original, draft);
+      if (generation !== this.intensiveReviewRequestGeneration) {
+        return;
+      }
+      this.intensiveReviewCache.set(key, result);
+      this.intensiveReviewLoadingKey = null;
+      this.updateIntensiveReview();
+    } catch (error) {
+      if (generation !== this.intensiveReviewRequestGeneration) {
+        return;
+      }
+      this.intensiveReviewLoadingKey = null;
+      this.intensiveReviewError = error instanceof Error
+        ? error.message
+        : "AI 批改失败，请隐藏后重新显示原文再试。";
+      this.updateIntensiveReview();
+    }
   }
 
   private stopIntensiveSegmentAtBoundary(currentTime: number): boolean {
@@ -4050,6 +4192,10 @@ export default class ListenBandPlugin extends Plugin {
 
   async translateSentence(sourceText: string): Promise<TranslationResult> {
     return this.getTranslationService().translate(sourceText);
+  }
+
+  async reviewDictation(original: string, draft: string): Promise<DictationReviewResult> {
+    return this.getTranslationService().reviewDictation(original, draft);
   }
 
   async analyzeSentence(

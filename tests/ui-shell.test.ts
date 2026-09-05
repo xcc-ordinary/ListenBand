@@ -350,6 +350,10 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(mainSource, /scheduleIntensiveMemorySave/u);
   assert.match(mainSource, /saveIntensiveMemory\(/u);
   assert.match(mainSource, /remembered\.sourceText === segment\.text/u);
+  assert.match(mainSource, /requestIntensiveDictationReview/u);
+  assert.match(mainSource, /reviewDictation\(original, draft\)/u);
+  assert.match(mainSource, /createDictationReviewCacheKey\(original, draft\)/u);
+  assert.match(mainSource, /IELTS AI 批改/u);
   assert.doesNotMatch(mainSource, /intensiveKeydownHandler/u);
   assert.doesNotMatch(mainSource, /aria-keyshortcuts/u);
   assert.match(mainSource, /"intensive-previous-sentence",[\s\S]*?"previous",[\s\S]*?"ArrowLeft"/u);
@@ -389,6 +393,8 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(css, /\.evs-intensive-dictation \{/u);
   assert.match(css, /\.evs-intensive-dictation-input \{/u);
   assert.match(css, /\.evs-intensive-comparison \{/u);
+  assert.match(css, /\.evs-intensive-review \{/u);
+  assert.match(css, /\.evs-intensive-review\.is-correct/u);
   assert.match(css, /\.evs-intensive-translation \{/u);
   assert.match(css, /\.evs-intensive-analysis \{/u);
   assert.match(css, /\.evs-intensive-analysis-grid \{/u);

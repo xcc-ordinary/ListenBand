@@ -15,6 +15,11 @@ import {
   type StudyDictionaryHint,
   type StudyProfile
 } from "./study-core";
+import {
+  buildDictationReviewRequestBody,
+  parseDictationReview,
+  type DictationReview
+} from "./dictation-review-core";
 
 const REQUEST_TIMEOUT_MS = 30_000;
 
@@ -35,6 +40,11 @@ export interface StudyAnalysisResult {
   translation: string;
   analysis: SentenceStudyAnalysis | null;
   warning: string | null;
+  provider: Exclude<TranslationProvider, "disabled">;
+  model: string;
+}
+
+export interface DictationReviewResult extends DictationReview {
   provider: Exclude<TranslationProvider, "disabled">;
   model: string;
 }
@@ -76,6 +86,22 @@ export class TranslationService {
     const parsed = parseStudyAnalysisResult(payload, sourceText);
     return {
       ...parsed,
+      provider: config.provider,
+      model: config.model
+    };
+  }
+
+  async reviewDictation(original: string, draft: string): Promise<DictationReviewResult> {
+    const config = this.resolveConfig();
+    const body = buildDictationReviewRequestBody(
+      config.provider,
+      config.model,
+      original,
+      draft
+    );
+    const payload = await this.request(config, body, "AI 批改");
+    return {
+      ...parseDictationReview(parseTranslationResponse(payload)),
       provider: config.provider,
       model: config.model
     };
