@@ -346,6 +346,10 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(mainSource, /intensiveSentenceStates = new Map/u);
   assert.match(mainSource, /saveIntensiveSentenceState/u);
   assert.match(mainSource, /restoreIntensiveSentenceState/u);
+  assert.match(mainSource, /loadIntensiveMemory\(path, transcript\.videoId\)/u);
+  assert.match(mainSource, /scheduleIntensiveMemorySave/u);
+  assert.match(mainSource, /saveIntensiveMemory\(/u);
+  assert.match(mainSource, /remembered\.sourceText === segment\.text/u);
   assert.doesNotMatch(mainSource, /intensiveKeydownHandler/u);
   assert.doesNotMatch(mainSource, /aria-keyshortcuts/u);
   assert.match(mainSource, /"intensive-previous-sentence",[\s\S]*?"previous",[\s\S]*?"ArrowLeft"/u);

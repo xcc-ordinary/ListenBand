@@ -26,6 +26,7 @@ await esbuild.build({
     "tests/translation-core.test.ts",
     "tests/study-core.test.ts",
     "tests/study-cache-core.test.ts",
+    "tests/intensive-memory-core.test.ts",
     "tests/dictionary-core.test.ts",
     "tests/full-dictionary.test.ts",
     "tests/vocabulary-core.test.ts",

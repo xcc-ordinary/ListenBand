@@ -102,6 +102,11 @@ import {
   getStudyBlockCursorRecovery
 } from "./live-preview-core";
 import { VersionedAsyncCache } from "./versioned-async-cache";
+import {
+  IntensiveMemoryStore,
+  type IntensiveMemoryLoadResult
+} from "./intensive-memory";
+import type { IntensiveMemoryEntry } from "./intensive-memory-core";
 import ribbonLogoMaskUrl from "../assets/logo-ribbon-mask.png";
 
 interface TranscriptCodeBlockConfig {
@@ -154,6 +159,7 @@ interface TranscriptRenderData {
   studyFingerprints: Array<Record<StudyProfile, string>>;
   cache: TranslationCacheLoadResult;
   studyCache: StudyCacheLoadResult;
+  intensiveMemory: IntensiveMemoryLoadResult;
 }
 
 interface TranscriptFingerprintData {
@@ -453,6 +459,9 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     draft: string;
     revealed: boolean;
   }>();
+  private readonly intensiveDirtySentenceIndices = new Set<number>();
+  private intensiveSegmentFingerprints: string[] = [];
+  private intensiveMemorySaveTimer: number | null = null;
   private intensiveDictationInput: HTMLTextAreaElement | null = null;
   private intensiveComparisonEl: HTMLElement | null = null;
   private intensivePositionEl: HTMLElement | null = null;
@@ -537,6 +546,8 @@ class ListenBandRenderChild extends MarkdownRenderChild {
   }
 
   onunload(): void {
+    this.saveIntensiveSentenceState();
+    this.persistIntensiveSentenceState();
     this.destroyed = true;
     this.plugin.unregisterStudyRenderer(this);
     this.localSeekGeneration += 1;
@@ -606,6 +617,12 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     this.intensiveSentenceRevealed = false;
     this.intensiveDictationDraft = "";
     this.intensiveSentenceStates.clear();
+    this.intensiveDirtySentenceIndices.clear();
+    this.intensiveSegmentFingerprints = [];
+    if (this.intensiveMemorySaveTimer !== null) {
+      window.clearTimeout(this.intensiveMemorySaveTimer);
+      this.intensiveMemorySaveTimer = null;
+    }
     this.intensiveDictationInput = null;
     this.intensiveComparisonEl = null;
     this.intensivePositionEl = null;
@@ -1146,10 +1163,11 @@ class ListenBandRenderChild extends MarkdownRenderChild {
 
   private async loadTranscriptRenderData(path: string): Promise<TranscriptRenderData> {
     const { file, transcript } = await this.readTranscript(path);
-    const [fingerprintData, cache, studyCache] = await Promise.all([
+    const [fingerprintData, cache, studyCache, intensiveMemory] = await Promise.all([
       this.plugin.getTranscriptFingerprintData(file, transcript),
       this.plugin.loadTranslationCache(path, transcript.videoId),
-      this.plugin.loadStudyCache(path, transcript.videoId)
+      this.plugin.loadStudyCache(path, transcript.videoId),
+      this.plugin.loadIntensiveMemory(path, transcript.videoId)
     ]);
     return {
       transcript,
@@ -1157,7 +1175,8 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       fingerprints: fingerprintData.fingerprints,
       studyFingerprints: fingerprintData.studyFingerprints,
       cache,
-      studyCache
+      studyCache,
+      intensiveMemory
     };
   }
 
@@ -1240,12 +1259,26 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       fingerprints,
       studyFingerprints,
       cache,
-      studyCache
+      studyCache,
+      intensiveMemory
     } = data;
     this.transcript = transcript;
     this.transcriptPath = transcriptPath;
     this.cachedTranslations = cache.translations;
     this.cachedStudies = studyCache.analyses;
+    this.intensiveSegmentFingerprints = [...fingerprints];
+    this.intensiveSentenceStates.clear();
+    fingerprints.forEach((fingerprint, index) => {
+      const remembered = intensiveMemory.sentences[fingerprint];
+      const segment = transcript.segments[index];
+      if (remembered && segment && remembered.sourceText === segment.text) {
+        this.intensiveSentenceStates.set(index, {
+          draft: remembered.draft,
+          revealed: remembered.revealed
+        });
+      }
+    });
+    this.restoreIntensiveSentenceState(0);
 
     if (cache.warning) {
       const warning = root.createDiv({ cls: "evs-cache-warning", text: cache.warning });
@@ -1253,6 +1286,10 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     }
     if (studyCache.warning) {
       const warning = root.createDiv({ cls: "evs-cache-warning", text: studyCache.warning });
+      warning.setAttribute("role", "status");
+    }
+    if (intensiveMemory.warning) {
+      const warning = root.createDiv({ cls: "evs-cache-warning", text: intensiveMemory.warning });
       warning.setAttribute("role", "status");
     }
 
@@ -1478,6 +1515,8 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     input.addEventListener("input", () => {
       this.intensiveDictationDraft = input.value;
       this.saveIntensiveSentenceState();
+      this.intensiveDirtySentenceIndices.add(this.intensiveSegmentIndex);
+      this.scheduleIntensiveMemorySave();
       this.updateIntensiveComparison();
     });
     this.intensiveDictationInput = input;
@@ -1556,6 +1595,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
       this.updateIntensiveListeningPanel();
     } else {
       this.saveIntensiveSentenceState();
+      this.persistIntensiveSentenceState();
       this.intensiveStopArmed = false;
       this.selectSegmentForActions(this.intensiveSegmentIndex, false);
       this.centerSegment(this.intensiveSegmentIndex);
@@ -1618,6 +1658,7 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     }
     const changingSentence = index !== this.intensiveSegmentIndex;
     this.saveIntensiveSentenceState();
+    this.persistIntensiveSentenceState();
     this.intensiveSegmentIndex = index;
     this.intensiveStopArmed = true;
     if (changingSentence) {
@@ -1630,6 +1671,8 @@ class ListenBandRenderChild extends MarkdownRenderChild {
   private toggleIntensiveSentenceReveal(): void {
     this.intensiveSentenceRevealed = !this.intensiveSentenceRevealed;
     this.saveIntensiveSentenceState();
+    this.intensiveDirtySentenceIndices.add(this.intensiveSegmentIndex);
+    this.persistIntensiveSentenceState();
     this.updateIntensiveListeningPanel();
   }
 
@@ -1766,6 +1809,51 @@ class ListenBandRenderChild extends MarkdownRenderChild {
     const state = this.intensiveSentenceStates.get(index);
     this.intensiveDictationDraft = state?.draft ?? "";
     this.intensiveSentenceRevealed = state?.revealed ?? false;
+  }
+
+  private scheduleIntensiveMemorySave(): void {
+    if (this.intensiveMemorySaveTimer !== null) {
+      window.clearTimeout(this.intensiveMemorySaveTimer);
+    }
+    this.intensiveMemorySaveTimer = window.setTimeout(() => {
+      this.intensiveMemorySaveTimer = null;
+      this.persistIntensiveSentenceState();
+    }, 350);
+  }
+
+  private persistIntensiveSentenceState(): void {
+    if (this.intensiveMemorySaveTimer !== null) {
+      window.clearTimeout(this.intensiveMemorySaveTimer);
+      this.intensiveMemorySaveTimer = null;
+    }
+    const index = this.intensiveSegmentIndex;
+    if (!this.intensiveDirtySentenceIndices.has(index)) {
+      return;
+    }
+    const transcript = this.transcript;
+    const fingerprint = this.intensiveSegmentFingerprints[index];
+    const segment = transcript?.segments[index];
+    const state = this.intensiveSentenceStates.get(index);
+    if (!transcript || !fingerprint || !segment || !state || this.transcriptPath === "") {
+      return;
+    }
+    this.intensiveDirtySentenceIndices.delete(index);
+    const entry: IntensiveMemoryEntry = {
+      sourceText: segment.text,
+      draft: state.draft,
+      revealed: state.revealed,
+      updatedAt: new Date().toISOString()
+    };
+    void this.plugin.saveIntensiveMemory(
+      this.transcriptPath,
+      transcript.videoId,
+      fingerprint,
+      entry
+    ).catch(() => {
+      if (!this.destroyed) {
+        this.intensiveDirtySentenceIndices.add(index);
+      }
+    });
   }
 
   isIntensiveCommandTarget(): boolean {
@@ -3465,6 +3553,7 @@ export default class ListenBandPlugin extends Plugin {
   private translationService: TranslationService | null = null;
   private translationCacheStore: TranslationCacheStore | null = null;
   private studyCacheStore: StudyCacheStore | null = null;
+  private intensiveMemoryStore: IntensiveMemoryStore | null = null;
   private vocabularyStore: VocabularyStore | null = null;
   private readonly offlineDictionary = new OfflineDictionary();
   private fullDictionaryService: FullDictionaryService | null = null;
@@ -3503,6 +3592,7 @@ export default class ListenBandPlugin extends Plugin {
     this.translationService = new TranslationService(this.app, () => this.settings);
     this.translationCacheStore = new TranslationCacheStore(this.app);
     this.studyCacheStore = new StudyCacheStore(this.app);
+    this.intensiveMemoryStore = new IntensiveMemoryStore(this.app);
     this.vocabularyStore = new VocabularyStore(this.app);
     this.fullDictionaryService = new FullDictionaryService();
     const fullDictionaryStatus = await this.fullDictionaryService.initialize();
@@ -4516,6 +4606,27 @@ export default class ListenBandPlugin extends Plugin {
     return this.getStudyCacheStore().load(transcriptPath, videoId);
   }
 
+  async loadIntensiveMemory(
+    transcriptPath: string,
+    videoId: string
+  ): Promise<IntensiveMemoryLoadResult> {
+    return this.getIntensiveMemoryStore().load(transcriptPath, videoId);
+  }
+
+  async saveIntensiveMemory(
+    transcriptPath: string,
+    videoId: string,
+    fingerprint: string,
+    entry: IntensiveMemoryEntry
+  ): Promise<void> {
+    await this.getIntensiveMemoryStore().upsert(
+      transcriptPath,
+      videoId,
+      fingerprint,
+      entry
+    );
+  }
+
   async saveStudyCache(
     transcriptPath: string,
     videoId: string,
@@ -4552,6 +4663,13 @@ export default class ListenBandPlugin extends Plugin {
       throw new Error("知识卡缓存尚未初始化，请重新加载插件。");
     }
     return this.studyCacheStore;
+  }
+
+  private getIntensiveMemoryStore(): IntensiveMemoryStore {
+    if (!this.intensiveMemoryStore) {
+      throw new Error("单句默写记忆尚未初始化，请重新加载插件。");
+    }
+    return this.intensiveMemoryStore;
   }
 
   private getVocabularyStore(): VocabularyStore {
