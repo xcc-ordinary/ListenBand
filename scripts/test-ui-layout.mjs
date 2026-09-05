@@ -228,11 +228,11 @@ try {
           dictionaryBody.scrollTop = dictionaryBody.scrollHeight;
           check(reviewButtons.at(-1).getBoundingClientRect().bottom <= dictionaryBody.getBoundingClientRect().bottom + 1, "复习评分按钮仍被侧栏底部裁切");
           check(
-            getComputedStyle(list).overflowY === "visible",
-            "字幕列表仍在使用内部滚动窗口"
+            getComputedStyle(list).overflowY === "auto",
+            "字幕列表没有使用独立滚动窗口"
           );
-          check(list.scrollHeight <= list.clientHeight + 1, "字幕内容仍被内部高度裁切");
-          check(list.scrollTop === 0, "展开式字幕列表不应产生内部滚动位置");
+          check(list.scrollHeight > list.clientHeight, "长字幕没有形成完整的内部滚动范围");
+          check(list.scrollTop === 0, "字幕列表初始位置不是第一句");
           check(getComputedStyle(segmentActionDock).position === "sticky", "字幕共用操作栏没有固定在右侧");
           check(segmentActionDock.querySelectorAll("button").length === 2, "字幕共用操作栏不是两个按钮");
           check(rows.every((row) => row.querySelectorAll("button:not(.evs-timestamp)").length === 0), "字幕行仍在重复显示操作按钮");
@@ -240,10 +240,10 @@ try {
           check(extensionCard.clientHeight + 1 >= extensionCard.scrollHeight, "延伸拓展知识卡内容被裁切");
           check(status.getBoundingClientRect().height === 0, "就绪状态没有完全收起");
           check(
-            rows.every((row) => row.getBoundingClientRect().bottom <= root.getBoundingClientRect().bottom + 1),
-            "存在超出播放器根容器、被隐藏的字幕"
+            list.getBoundingClientRect().bottom <= root.getBoundingClientRect().bottom + 1,
+            "字幕滚动窗口超出了播放器根容器"
           );
-          check(viewport.scrollHeight > viewport.clientHeight, "长字幕没有交给整页滚动");
+          check(viewport.scrollHeight <= viewport.clientHeight + 1, "字幕错误地撑高了整个阅读页面");
           check(
             Math.abs(initialDockRect.width - Math.min(root.clientWidth, 680)) <= 1,
             "播放器没有保持统一的小尺寸：dock=" + initialDockRect.width +
@@ -345,15 +345,6 @@ try {
             floatingToggle.setAttribute("aria-pressed", String(floating));
           });
 
-          viewport.scrollTop = Math.min(
-            initialDockRect.height + 80,
-            viewport.scrollHeight - viewport.clientHeight
-          );
-          check(
-            dock.getBoundingClientRect().top < viewport.getBoundingClientRect().top,
-            "默认状态下播放器错误地保持悬浮"
-          );
-
           floatingToggle.click();
           check(dock.classList.contains("is-floating"), "悬浮按钮没有开启播放器悬浮");
           check(floatingToggle.getAttribute("aria-pressed") === "true", "悬浮按钮状态没有同步");
@@ -362,10 +353,6 @@ try {
             "开启悬浮后播放器尺寸发生变化"
           );
 
-          check(
-            Math.abs(dock.getBoundingClientRect().top - (viewport.getBoundingClientRect().top + 8)) <= 1,
-            "开启悬浮后播放器没有吸附在阅读视图顶部"
-          );
           check(dock.getBoundingClientRect().bottom > viewport.getBoundingClientRect().top, "吸顶播放器不可见");
 
           const followedRow = rows[6];
@@ -383,36 +370,47 @@ try {
           check(!dock.classList.contains("is-floating"), "悬浮按钮没有取消播放器悬浮");
           check(floatingToggle.getAttribute("aria-pressed") === "false", "取消悬浮后按钮状态没有同步");
 
+          const beforeStatusTranscriptHeight = list.clientHeight;
           status.classList.remove("is-collapsed");
           check(status.getBoundingClientRect().height > 0, "本地状态没有正常显示");
-          check(root.getBoundingClientRect().height > initialRootHeight, "状态展开后页面没有自然增高");
+          check(
+            Math.abs(root.getBoundingClientRect().height - initialRootHeight) <= 1,
+            "状态展开后错误地撑高了固定播放器容器"
+          );
+          check(list.clientHeight < beforeStatusTranscriptHeight, "状态展开后字幕视口没有自动让出空间");
           status.classList.add("is-collapsed");
 
           const beforeTranslationHeight = root.getBoundingClientRect().height;
+          const beforeTranslationScrollHeight = list.scrollHeight;
           const translation = document.createElement("div");
           translation.className = "evs-translation-text";
           translation.innerHTML = '<div class="evs-study-section"><div class="evs-study-heading">中文译文</div><div class="evs-translation-copy">' + '这是一段会改变行高的长翻译内容。'.repeat(8) + '</div></div><div class="evs-study-section"><div class="evs-study-heading">重点词汇与搭配</div><ul class="evs-study-list"><li><strong>study antidepressants</strong><div class="evs-study-note">重点表达说明</div></li></ul></div><div class="evs-study-section evs-study-exam-tip"><div class="evs-study-heading">备考提示</div><div>四级备考提示</div></div>';
           rows[2].querySelector(".evs-segment-content").append(translation);
           check(
-            root.getBoundingClientRect().height > beforeTranslationHeight,
-            "翻译展开后根页面没有随内容增高"
+            Math.abs(root.getBoundingClientRect().height - beforeTranslationHeight) <= 1,
+            "翻译展开后错误地挤占了视频或撑高了页面"
           );
-          check(list.scrollHeight <= list.clientHeight + 1, "翻译展开后又形成了内部滚动");
+          check(list.scrollHeight > beforeTranslationScrollHeight, "翻译展开后没有增加字幕滚动范围");
 
           const beforeTallRowHeight = root.getBoundingClientRect().height;
+          const dockTopBeforeTranscriptScroll = dock.getBoundingClientRect().top;
           rows[4].querySelector(".evs-segment-content").style.minHeight = (window.innerHeight + 80) + "px";
           check(
-            root.getBoundingClientRect().height > beforeTallRowHeight,
-            "超长字幕没有继续向下展开"
+            Math.abs(root.getBoundingClientRect().height - beforeTallRowHeight) <= 1,
+            "超长字幕错误地撑高了播放器根容器"
           );
           check(
-            rows.at(-1).getBoundingClientRect().bottom <= root.getBoundingClientRect().bottom + 1,
-            "超长字幕导致后续内容被根容器隐藏"
+            list.scrollHeight > list.clientHeight,
+            "超长字幕没有保留可滚动的后续内容"
           );
-          viewport.scrollTop = viewport.scrollHeight;
+          list.scrollTop = list.scrollHeight;
           check(
-            rows.at(-1).getBoundingClientRect().bottom <= viewport.getBoundingClientRect().bottom + 1,
-            "整页滚动无法看到最后一句字幕"
+            rows.at(-1).getBoundingClientRect().bottom <= list.getBoundingClientRect().bottom + 1,
+            "字幕内部滚动无法看到最后一句"
+          );
+          check(
+            Math.abs(dock.getBoundingClientRect().top - dockTopBeforeTranscriptScroll) <= 1,
+            "滚动字幕时视频位置发生了变化"
           );
           check(
             segmentActionDock.getBoundingClientRect().bottom <= list.getBoundingClientRect().bottom + 1,

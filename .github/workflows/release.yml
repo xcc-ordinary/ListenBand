@@ -41,6 +41,7 @@ jobs:
         run: |
           npm run lint
           npm test
+          npm run test:ui
           npm run build
 
       - name: Generate build provenance

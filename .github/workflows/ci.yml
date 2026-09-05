@@ -38,6 +38,9 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Test browser layout
+        run: npm run test:ui
+
       - name: Build
         run: npm run build
 
