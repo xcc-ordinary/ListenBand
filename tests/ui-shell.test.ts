@@ -328,6 +328,11 @@ test("固定播放器并让字幕在独立视口中自动跟随", async () => {
   assert.match(css, /\.evs-root \{[^}]*height: min\(820px, calc\(100vh - 48px\)\);/u);
   assert.match(css, /\.evs-transcript \{[^}]*overflow-y: auto;/u);
   assert.match(css, /\.evs-intensive-listening \{/u);
+  assert.match(
+    css,
+    /\.evs-intensive-focus \{[^}]*?overflow-y: auto;[^}]*?overscroll-behavior: contain;[^}]*?justify-content: safe center;/u
+  );
+  assert.match(css, /\.evs-intensive-focus \{[^}]*?scrollbar-gutter: stable(?: both-edges)?;/u);
   assert.match(css, /\.evs-intensive-controls \{[^}]*grid-template-columns: repeat\(3/u);
   assert.match(mainSource, /createListeningModeButton/u);
   assert.match(mainSource, /playIntensiveSegment/u);

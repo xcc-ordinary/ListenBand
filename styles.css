@@ -556,11 +556,23 @@
 
 .evs-intensive-focus {
   display: flex;
+  width: 100%;
+  min-width: 0;
   min-height: 0;
   align-items: center;
-  justify-content: center;
   flex-direction: column;
   gap: 18px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  justify-content: safe center;
+  padding-block: 4px;
+  scrollbar-gutter: stable both-edges;
+  touch-action: pan-y;
+}
+
+.evs-intensive-focus > * {
+  flex: 0 0 auto;
 }
 
 .evs-intensive-focus-actions {
